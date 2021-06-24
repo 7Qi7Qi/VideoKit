@@ -23,7 +23,7 @@ public class RenameKit {
     private static final List<String> customWords = new ArrayList<>();
     private static final List<String> customRegex = new ArrayList<>();
 
-    private static final Map<String, List<String>> customName2File = new HashMap<>() {{
+    private static final Map<String, List<String>> customName2File = new HashMap<String, List<String>>() {{
         put("words.txt", customWords);
         put("regex.txt", customRegex);
     }};
