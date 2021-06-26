@@ -43,6 +43,7 @@ public class VideoKitService {
                         File video = fileOptional.get();
                         String videoName = getVideoName(
                                 new File(folder.getAbsolutePath(), "project.json"));
+                        logger.info("get video name from project.json {}", videoName);
                         renameKit.renameFile(video, new File(path, videoName));
                     }
                 }

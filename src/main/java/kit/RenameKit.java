@@ -173,7 +173,7 @@ public class RenameKit {
     public static String readFile(File file) {
         String str = "";
         try {
-            str = FileUtils.readFileToString(file);
+            str = FileUtils.readFileToString(file, "UTF-8");
         }catch (IOException e) {
             logger.error("{} read file failed", file.getAbsolutePath());
         }
