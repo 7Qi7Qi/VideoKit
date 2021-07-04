@@ -74,9 +74,11 @@ public class FxController implements Initializable {
         if (StringUtils.isNotBlank(filePath)) {
             if ( !filePath.endsWith("#")) {
                 new Alert(Alert.AlertType.WARNING, "文件目录必须是 # ", null).show();
-                System.out.println(retainOrigin.isSelected());
             }else {
+                Alert process = new Alert(AlertType.INFORMATION, "任务执行中", null);
+                process.show();
                 VideoKitService.mainVideoFix(opt, filePath);
+                process.close();
                 new Alert(AlertType.INFORMATION, "操作完成",  null).show();
             }
         }else {

@@ -1,6 +1,7 @@
 package kit;
 
 import enums.FilePrefixEnum;
+import enums.VideoSuffixEnum;
 import java.util.HashMap;
 import java.util.Map;
 import javafx.util.Pair;
@@ -29,7 +30,26 @@ public class RenameKit {
     }};
     public static Logger logger = LoggerFactory.getLogger(RenameKit.class);
 
-    public File customRename(File input) {
+    public void renameForAll(File file) {
+        if (file.isFile()) {
+            renameForFile(file);
+        }else {
+            List<String> extensions = VideoSuffixEnum.getAllExtensions();
+            File[] files = file.listFiles();
+            for (File input : files) {
+                String inputName = input.getName();
+                String suffix = inputName.substring(inputName.lastIndexOf('.') + 1).toLowerCase();
+                if (extensions.contains(suffix)) {
+                    renameFileInFolder(input, fixCustomWords(inputName), 1);
+                }else if ("torrent".equals(suffix)) {
+                    boolean delete = input.delete();
+                    logger.info("{} delete successfully ", input);
+                }
+            }
+        }
+    }
+
+    public File renameForFile(File input) {
         String fileName = input.getName();
         String output = fixCustomWords(fileName);
         //why reference not take effect
@@ -101,11 +121,31 @@ public class RenameKit {
                     input.getAbsolutePath());
             return input;
         }
-        return input.renameTo(output) ? output : input;
+        boolean result = input.renameTo(output);
+        if (!result) {
+            logger.warn("{} rename to {} failed", input, output);
+        }
+        return result ? output : input;
     }
 
-    public File renameFileInFolder(File input, String output) {
-        return renameFile(input, new File(input.getParent(), output.trim()));
+    public File renameFileInFolder(File input, String outputFileName) {
+        return renameFileInFolder(input, outputFileName, 0);
+
+    }
+
+    /**
+     *
+     * @param in input file
+     * @param out output file name
+     * @param layer 0 -> no move, 1 -> move to parent ... etc.
+     * @return
+     */
+    public File renameFileInFolder(File in, String out, Integer layer) {
+        File parent = in;
+        for (int i = 0; i <= layer; i++) {
+            parent = new File(parent.getParent());
+        }
+        return renameFile(in, new File(parent, out.trim()));
     }
 
     public void renameFolderAndFile(File file) {

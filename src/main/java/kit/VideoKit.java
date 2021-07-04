@@ -47,7 +47,7 @@ public class VideoKit {
                 String regexPath = mainPath + FileEnum.SEPARATOR.getName() + exFileList.get(1);
                 //initialize custom words that you want to delete
                 renameKit.addCustomWords(wordsPath, regexPath);
-                Arrays.stream(listFiles).forEach(renameKit::customRename);
+                Arrays.stream(listFiles).forEach(renameKit::renameForAll);
             } else if (ProcessTypeEnum.BUILD_COVER_PIC.equals(typeEnum)) {
                 Arrays.stream(listFiles).forEach(this::captureCover);
             } else if (ProcessTypeEnum.BUILD_LATEST_COVER.equals(typeEnum)) {
@@ -114,7 +114,7 @@ public class VideoKit {
      * 3. build latest video cover
      */
     public void oneStepService(File file, String parentFolder) {
-        File handleName = renameKit.customRename(file);
+        File handleName = renameKit.renameForFile(file);
         if (StringUtils.isNumeric(parentFolder)) {
             String cutCover = cutFixedCover(handleName, Integer.parseInt(parentFolder));
             if (cutCover != null) {
