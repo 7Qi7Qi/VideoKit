@@ -48,6 +48,7 @@ public class FxController implements Initializable {
         String filePath = this.fileTextField.getText();
         if (StringUtils.isNotBlank(filePath)) {
             VideoKitService.tidyVideos(filePath);
+            new Alert(AlertType.INFORMATION, "操作完成",  null).show();
         }else {
             new Alert(Alert.AlertType.WARNING, "请先选择文件目录", null).show();
         }

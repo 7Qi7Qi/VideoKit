@@ -24,7 +24,7 @@ public class RenameKit {
     private static final List<String> customWords = new ArrayList<>();
     private static final List<String> customRegex = new ArrayList<>();
 
-    private static final Map<String, List<String>> customName2File = new HashMap<String, List<String>>() {{
+    private static final Map<String, List<String>> customName2File = new HashMap<>() {{
         put("words.txt", customWords);
         put("regex.txt", customRegex);
     }};
@@ -37,26 +37,47 @@ public class RenameKit {
             List<String> extensions = VideoSuffixEnum.getAllExtensions();
             File[] files = file.listFiles();
             for (File input : files) {
-                String inputName = input.getName();
-                String suffix = inputName.substring(inputName.lastIndexOf('.') + 1).toLowerCase();
-                if (extensions.contains(suffix)) {
-                    renameFileInFolder(input, fixCustomWords(inputName), 1);
-                }else if ("torrent".equals(suffix)) {
-                    boolean delete = input.delete();
-                    logger.info("{} delete successfully ", input);
+                Pair<String, String> result = this.renameInnerOpt(input, extensions);
+                String nameAfterFix = result.getValue();
+                if (nameAfterFix != null) {
+                    renameFileInFolder(input, nameAfterFix, 1);
+                }
+                if ("torrent".equals(result.getKey())) {
+                    if (!input.delete()) {
+                        logger.info("{} fail to delete", input);
+                    }
                 }
             }
         }
     }
 
     public File renameForFile(File input) {
-        String fileName = input.getName();
-        String output = fixCustomWords(fileName);
-        //why reference not take effect
-        if (output.equals(fileName)) {
-            return input;
+        Pair<String, String> result = this.renameInnerOpt(input, null);
+        if ( result.getValue() != null) {
+            renameFileInFolder(input,  result.getValue());
         }
-        return renameFileInFolder(input, output);
+        return input;
+    }
+
+    /**
+     *
+     * @param input file wanted to rename
+     * @param types rename file that in types
+     * @return extension , fileName
+     */
+    private Pair<String, String> renameInnerOpt(File input, List<String> types) {
+        String inputName = input.getName();
+        int dotIndex = inputName.lastIndexOf('.');
+        String fileName = inputName.substring(0, dotIndex);
+        String extension = inputName.substring(dotIndex + 1).toLowerCase();
+        String output = fileName;
+        if (types == null || types.contains(extension)) {
+            output = seriesRename(fileName);
+        }
+        if (output.equals(fileName)) {
+            return new Pair<>(extension, null);
+        }
+        return new Pair<>(extension, output + "." + extension);
     }
 
     public void addCustomWords(String... paths) {
@@ -81,26 +102,21 @@ public class RenameKit {
         }
     }
 
-    protected String fixCustomWords(String str) {
+    public String seriesRename(String input) {
+        //RemoveCustomWord
         if (customWords.size() > 0) {
             for (String word : customWords) {
-                str = str.replace(word, "");
+                input = input.replace(word, "");
             }
         }
-        return fixRegexWords(str);
-    }
-
-    protected String fixRegexWords(String str) {
+        //RemoveRegexWord
         if (customRegex.size() > 0) {
             for (String regex : customRegex) {
                 //regex replace method
-                str = str.replaceAll(regex, "");
+                input = input.replaceAll(regex, "");
             }
         }
-        return handleCF(str);
-    }
-
-    public String handleCF(String input) {
+        //HandleCF
         String cfName = FilePrefixEnum.CF.getName();
         if (input.startsWith(cfName) || input.startsWith(cfName.toLowerCase())) {
             int index = 3;
@@ -112,8 +128,22 @@ public class RenameKit {
             }
             input = FilePrefixEnum.CF.getCode() + input.substring(index);
         }
-        return input;
+        //DeletePrefixNumber
+        if (input.matches("[0-9]{1,3}[\\D]+")) {
+            int start = 0;
+            for (int i = 0; i < Math.min(5, input.length()); i++) {
+                char c = input.charAt(i);
+                if (c <= '9' && c >=  '0' || c == '-') {
+                    start = i;
+                }
+            }
+            return input.substring(start + 1);
+        }else {
+            return input;
+        }
     }
+
+
 
     public File renameFile(File input, File output) {
         if (output.exists()) {
@@ -138,7 +168,6 @@ public class RenameKit {
      * @param in input file
      * @param out output file name
      * @param layer 0 -> no move, 1 -> move to parent ... etc.
-     * @return
      */
     public File renameFileInFolder(File in, String out, Integer layer) {
         File parent = in;
@@ -151,10 +180,13 @@ public class RenameKit {
     public void renameFolderAndFile(File file) {
         String fileName = file.getName();
         if (file.exists()) {
-            File output = renameFileInFolder(file, fixCustomWords(fileName));
-            if (output.isDirectory()) {
-                Arrays.stream(Objects.requireNonNull(output.listFiles()))
-                        .forEach(this::renameFolderAndFile);
+            String nameAfterFix = seriesRename(fileName);
+            if (!fileName.equals(nameAfterFix)) {
+                File output = renameFileInFolder(file, nameAfterFix);
+                if (output.isDirectory()) {
+                    Arrays.stream(Objects.requireNonNull(output.listFiles()))
+                            .forEach(this::renameFolderAndFile);
+                }
             }
         }
     }

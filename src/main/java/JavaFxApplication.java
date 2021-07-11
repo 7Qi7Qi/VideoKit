@@ -18,10 +18,10 @@ import java.net.URL;
  * refer to https://github.com/SW-Fantastic/Reader
  */
 @SuppressWarnings("ConstantConditions")
-public class VideoApplication extends Application {
+public class JavaFxApplication extends Application {
 
     public static final String FXML_NAME = "fx.fxml";
-    private static final Logger LOGGER = LoggerFactory.getLogger(VideoApplication.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(JavaFxApplication.class);
 
     @Override
     public void start(Stage primaryStage) {
@@ -41,7 +41,7 @@ public class VideoApplication extends Application {
     }
 
     public static void main(String[] args) {
-        VideoApplication.launch(args);
+        JavaFxApplication.launch(args);
     }
 
     private String findFxmlFile() {
