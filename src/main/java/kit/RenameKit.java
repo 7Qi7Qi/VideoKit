@@ -24,7 +24,7 @@ public class RenameKit {
     private static final List<String> customWords = new ArrayList<>();
     private static final List<String> customRegex = new ArrayList<>();
 
-    private static final Map<String, List<String>> customName2File = new HashMap<>() {{
+    private static final Map<String, List<String>> customName2File = new HashMap<String, List<String>>() {{
         put("words.txt", customWords);
         put("regex.txt", customRegex);
     }};
@@ -137,10 +137,13 @@ public class RenameKit {
                     start = i;
                 }
             }
-            return input.substring(start + 1);
-        }else {
-            return input;
+            input = input.substring(start + 1);
         }
+        //HandleFH
+        if (input.toLowerCase().matches("[\\w]{3,4}-[\\d]{3,4}(-c)?")) {
+            input = input.toUpperCase();
+        }
+        return input;
     }
 
 
@@ -149,7 +152,11 @@ public class RenameKit {
         if (output.exists()) {
             logger.warn("{} already exists, {} rename failed", output.getAbsolutePath(),
                     input.getAbsolutePath());
-            return input;
+            File duplicate = new File(output.getParent() + "/duplicate");
+            if (!duplicate.exists()) {
+                duplicate.mkdir();
+            }
+            return renameFile(input, new File(duplicate, output.getName()));
         }
         boolean result = input.renameTo(output);
         if (!result) {

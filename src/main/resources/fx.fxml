@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<VBox prefHeight="400.0" prefWidth="640.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.FxController">
+<VBox prefHeight="578.0" prefWidth="897.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.FxController">
    <children>
      <MenuBar VBox.vgrow="NEVER">
         <menus>
@@ -46,21 +46,21 @@
           </Menu>
         </menus>
      </MenuBar>
-     <AnchorPane VBox.vgrow="ALWAYS">
+     <AnchorPane prefHeight="368.0" prefWidth="712.0" VBox.vgrow="ALWAYS">
         <children>
           <Label alignment="CENTER" layoutX="155.0" layoutY="177.0" style="&#10;" textAlignment="CENTER" textFill="#9f9f9f">
             <font>
               <Font size="18.0" />
             </font>
           </Label>
-          <Button layoutX="68.0" layoutY="56.0" mnemonicParsing="false" onAction="#onOpen" prefHeight="33.0" prefWidth="106.0" text="选择文件夹" />
-          <TextField fx:id="fileTextField" layoutX="200.0" layoutY="56.0" prefHeight="33.0" prefWidth="335.0" promptText="显示选择的文件路径" />
-          <Button layoutX="205.0" layoutY="294.0" mnemonicParsing="false" onAction="#handlerDownload" prefHeight="51.0" prefWidth="270.0" text="处理文件名-剪辑片头-重建封面" />
-          <Button layoutX="128.0" layoutY="138.0" mnemonicParsing="false" onAction="#handlerWallPaper" prefHeight="51.0" prefWidth="145.0" text="处理Wallpaper" />
-          <Button layoutX="403.0" layoutY="214.0" mnemonicParsing="false" onAction="#buildCover" prefHeight="57.0" prefWidth="159.0" text="重建最新封面" />
-          <Button layoutX="403.0" layoutY="138.0" mnemonicParsing="false" onAction="#handlerFileName" prefHeight="51.0" prefWidth="159.0" text="处理文件名" />
-          <Button layoutX="121.0" layoutY="214.0" mnemonicParsing="false" onAction="#cutVideo" prefHeight="51.0" prefWidth="159.0" text="剪辑片头" />
-            <CheckBox fx:id="retainOrigin" layoutX="552.0" layoutY="62.0" mnemonicParsing="false" text="保留原文件" />
+          <Button layoutX="135.0" layoutY="56.0" mnemonicParsing="false" onAction="#onOpen" prefHeight="49.0" prefWidth="119.0" text="选择文件夹" />
+          <TextField fx:id="fileTextField" layoutX="297.0" layoutY="56.0" prefHeight="49.0" prefWidth="334.0" promptText="显示选择的文件路径" />
+          <Button layoutX="297.0" layoutY="362.0" mnemonicParsing="false" onAction="#handlerDownload" prefHeight="77.0" prefWidth="304.0" text="处理文件名-剪辑片头-重建封面" />
+          <Button layoutX="174.0" layoutY="151.0" mnemonicParsing="false" onAction="#handlerWallPaper" prefHeight="67.0" prefWidth="182.0" text="处理Wallpaper" />
+          <Button layoutX="535.0" layoutY="268.0" mnemonicParsing="false" onAction="#buildCover" prefHeight="67.0" prefWidth="194.0" text="重建最新封面" />
+          <Button layoutX="535.0" layoutY="151.0" mnemonicParsing="false" onAction="#handlerFileName" prefHeight="67.0" prefWidth="194.0" text="处理文件名" />
+          <Button layoutX="174.0" layoutY="268.0" mnemonicParsing="false" onAction="#cutVideo" prefHeight="67.0" prefWidth="182.0" text="剪辑片头" />
+            <CheckBox fx:id="retainOrigin" layoutX="678.0" layoutY="70.0" mnemonicParsing="false" text="保留原文件" />
         </children>
      </AnchorPane>
    </children>

@@ -25,11 +25,12 @@ import java.util.stream.Stream;
  */
 
 //@SuppressWarnings("unused")
-@SuppressWarnings("ConstantConditions")
+@SuppressWarnings({"ConstantConditions"})
 public class VideoKit {
 
     private final Logger logger = LoggerFactory.getLogger(VideoKit.class);
-    private final static List<String> exFileList = Arrays.asList("words.txt", "regex.txt", "rename", "output", "cover", "ignore");
+    private final static List<String> exFileList = Arrays.asList("words.txt", "regex.txt", "rename",
+            "output", "cover", "ignore");
     private final static RenameKit renameKit = new RenameKit();
 
     public void batchProcess(String pathName) {
@@ -57,7 +58,7 @@ public class VideoKit {
                     String folderName = folder.getName();
                     if (folder.isDirectory()) {
                         //return null when there is no right for the file
-                        Stream<File> fileStream = Arrays.stream(folder.listFiles());
+                        Stream<File> fileStream = Arrays.stream(folder.listFiles()).parallel();
                         switch (typeEnum) {
                             case CUT_VIDEO:
                                 if (folderName.matches("[0-9]+")) {
@@ -74,7 +75,7 @@ public class VideoKit {
                             default:
                                 logger.warn("{} unknown enum", typeEnum);
                         }
-                    } else if (!exFileList.get(0).equals(folderName)) {
+                    } else if (folderName.endsWith(FileEnum.TXT_FILE.getName())) {
                         logger.warn("{} is not a folder", folder.getPath());
                     }
                 }
@@ -84,13 +85,16 @@ public class VideoKit {
         }
     }
 
+
+
     public boolean executeCommand(String command) {
         Process process;
 //    StringBuilder ret = new StringBuilder();
         try {
             process = Runtime.getRuntime().exec(command);
             InputStream is = process.getErrorStream();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
+            InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
+            BufferedReader reader = new BufferedReader(isr);
             String line = "";
             while (process.isAlive() && (line = reader.readLine()) != null) {
 //        if (line.contains("Mainconcept MP4 Sound Media Handler")) {
@@ -107,6 +111,7 @@ public class VideoKit {
         }
     }
 
+    /*****************************************VideoRelated*****************************************/
     /**
      * one step to handle downloaded video
      * 1. handle file name, remove redundant string words in video name
@@ -119,7 +124,7 @@ public class VideoKit {
             String cutCover = cutFixedCover(handleName, Integer.parseInt(parentFolder));
             if (cutCover != null) {
                 String trash = createFolderIfAbsent(handleName, FileEnum.OLD_VIDEO.getName());
-                renameFile(handleName, new File(trash + handleName.getName()));
+                renameKit.renameFile(handleName, new File(trash + handleName.getName()));
                 String latestCover = createLatestCover(new File(cutCover));
                 if (latestCover != null) {
                     move2Parent(new File(latestCover), 2);
@@ -148,11 +153,27 @@ public class VideoKit {
         return duration;
     }
 
-    public File correctFile(File input) {
-        String fileName = input.getName();
-        fileName = fileName.substring(0, fileName.length() - 3) + "." + fileName
-                .substring(fileName.length() - 3);
-        return renameFile(input, new File(input.getParent(), fileName));
+    public String cutFixedCover(File file, long startSecond) {
+        if (file.isFile()) {
+            return cutFixedSize(file, startSecond, getVideoLength(file));
+        }
+        return null;
+    }
+
+    public String cutFixedSize(@NotNull File file, long start, long end) {
+        String outputPath =
+                createFolderIfAbsent(file, FileEnum.VIDEO_FOLDER.getName()) + file.getName();
+        if (fileNotExist(outputPath)) {
+            String command = String.format(FFMPEGEnum.SIMPLE_CLIP.normalCMD(), start,
+                    file.getAbsolutePath(), end, outputPath);
+            if (executeCommand(command)) {
+                logger.info("{} cut cover start from {} seconds", file.getAbsolutePath(), start);
+                return outputPath;
+            }
+        } else {
+            logger.warn("{} outputPath existed ", outputPath);
+        }
+        return null;
     }
 
     public void move2Parent(File input, int layer) {
@@ -160,21 +181,12 @@ public class VideoKit {
         for (int i = 0; i < layer; i++) {
             output = new File(new File(output.getParent()).getParent(), input.getName());
         }
-        renameFile(input, output);
+        renameKit.renameFile(input, output);
     }
 
-    public File renameFile(File input, File output) {
-        if (input.renameTo(output)) {
-            logger.info("rename to {} ", input.getName());
-            return output;
-        } else {
-            logger.warn("failed rename to {}", input.getName());
-            return input;
-        }
-    }
 
-    // can't directly output picture to new folder (can't create new folder)
-    //todo add isFile annotation
+
+    /****************************************PictureRelated****************************************/
     public String captureCover(File file) {
         if (file.isDirectory()) {
             logger.warn("{} capture cover failed, since parameter file is a directory",
@@ -184,7 +196,8 @@ public class VideoKit {
             String outputName = createFolderIfAbsent(file, FileEnum.COVER_FOLDER.getName());
             outputName += FileEnum.SEPARATOR.getName() + videoName + ".jpg";
             if (fileNotExist(outputName)) {
-                String command = String.format(FFMPEGEnum.CREATE_COVER.normalCMD(), 6, file.getAbsolutePath(), outputName);
+                String command = String.format(FFMPEGEnum.CREATE_COVER.normalCMD(), 6,
+                        file.getAbsolutePath(), outputName);
                 if (executeCommand(command)) {
                     logger.info("{} capture cover succeed", file.getAbsolutePath());
                     return outputName;
@@ -194,10 +207,6 @@ public class VideoKit {
             }
         }
         return null;
-    }
-
-    public Image getImageByPath(String filePath) {
-        return Toolkit.getDefaultToolkit().getImage(filePath);
     }
 
     public String createLatestCover(File file) {
@@ -221,29 +230,11 @@ public class VideoKit {
         return null;
     }
 
-    public String cutFixedCover(File file, long startSecond) {
-        if (file.isFile()) {
-            return cutFixedSize(file, startSecond, getVideoLength(file));
-        }
-        return null;
+    public Image getImageByPath(String filePath) {
+        return Toolkit.getDefaultToolkit().getImage(filePath);
     }
 
-    public String cutFixedSize(@NotNull File file, long start, long end) {
-        String outputPath =
-                createFolderIfAbsent(file, FileEnum.VIDEO_FOLDER.getName()) + file.getName();
-        if (fileNotExist(outputPath)) {
-            String command = String
-                    .format(FFMPEGEnum.SIMPLE_CLIP.normalCMD(), start, file.getAbsolutePath(), end, outputPath);
-            if (executeCommand(command)) {
-                logger.info("{} cut cover start from {} seconds", file.getAbsolutePath(), start);
-                return outputPath;
-            }
-        } else {
-            logger.warn("{} outputPath existed ", outputPath);
-        }
-        return null;
-    }
-
+    /***************************************DirectoryRelated***************************************/
     public void deleteDir(File dir) {
         if (dir.exists()) {
             if (dir.delete()) {
@@ -257,7 +248,9 @@ public class VideoKit {
 
     }
 
-    //directory with subFile can't delete directly, need delete recursively
+    /**
+     * directory with subFile can't delete directly, need delete recursively
+     */
     public boolean deleteDirRecursive(File dir) {
         if (dir.isDirectory()) {
             File[] files = dir.listFiles();
@@ -300,55 +293,10 @@ public class VideoKit {
                 logger.warn("fail to create folder: {}", file.getAbsolutePath());
             }
         }
-//    else {
-//      logger.info("already existed", filePath);
-//    }
     }
 
     protected boolean fileNotExist(String filePath) {
         return !new File(filePath).exists();
-    }
-
-    protected static List<File> filterVideoFiles(File file) {
-        return filterFiles(file, val -> VideoSuffixEnum.getAllExtensions().stream().anyMatch(val::endsWith));
-    }
-
-    protected static List<File> filterAllVideoFiles(File file) {
-        return filterAllFiles(file, val -> VideoSuffixEnum.getAllExtensions().stream().anyMatch(val::endsWith), true);
-    }
-
-    protected static List<File> filterFiles(File file, Predicate<String> judgeType) {
-        ArrayList<File> fileList = new ArrayList<>();
-        if (file.exists()) {
-            if (file.isDirectory()) {
-                File[] files = file.listFiles();
-                for (File f : Objects.requireNonNull(files)) {
-                    fileList.addAll(filterAllFiles(f, judgeType, false));
-                }
-            } else {
-                if (judgeType.test(file.getName())) {
-                    fileList.add(file);
-                }
-            }
-        }
-        return fileList;
-    }
-
-    protected static List<File> filterAllFiles(File file, Predicate<String> judgeType, Boolean flag) {
-        ArrayList<File> fileList = new ArrayList<>();
-        if (file.exists()) {
-            if (file.isDirectory() && flag) {
-                File[] files = file.listFiles();
-                for (File f : Objects.requireNonNull(files)) {
-                    fileList.addAll(filterAllFiles(f, judgeType, true));
-                }
-            } else {
-                if (judgeType.test(file.getName())) {
-                    fileList.add(file);
-                }
-            }
-        }
-        return fileList;
     }
 
 }

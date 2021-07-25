@@ -13,9 +13,13 @@ import javafx.stage.Stage;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FxController implements Initializable {
 
+
+    private Logger LOGGER = LoggerFactory.getLogger(getClass());
 
     @FXML
     private TextField fileTextField;
@@ -47,7 +51,7 @@ public class FxController implements Initializable {
     void handlerWallPaper() {
         String filePath = this.fileTextField.getText();
         if (StringUtils.isNotBlank(filePath)) {
-            VideoKitService.tidyVideos(filePath);
+            OtherKitsService.tidyVideos(filePath);
             new Alert(AlertType.INFORMATION, "操作完成",  null).show();
         }else {
             new Alert(Alert.AlertType.WARNING, "请先选择文件目录", null).show();
@@ -76,10 +80,14 @@ public class FxController implements Initializable {
             if ( !filePath.endsWith("#")) {
                 new Alert(Alert.AlertType.WARNING, "文件目录必须是 # ", null).show();
             }else {
+                long start = System.currentTimeMillis();
+                LOGGER.info("start video from {} ", start);
                 Alert process = new Alert(AlertType.INFORMATION, "任务执行中", null);
                 process.show();
-                VideoKitService.mainVideoFix(opt, filePath);
+                OtherKitsService.mainVideoFix(opt, filePath);
                 process.close();
+                long end = System.currentTimeMillis();
+                LOGGER.info("end video at {}, use {}", end, (end - start));
                 new Alert(AlertType.INFORMATION, "操作完成",  null).show();
             }
         }else {

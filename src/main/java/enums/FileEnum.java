@@ -12,6 +12,7 @@ public enum FileEnum {
     COVER_FOLDER("screenshot"),
     ORIGINAL_FILE("original"),
 
+    TXT_FILE(".txt"),
     DEFAULT_EXPORT_FILE("document.txt");
 
     private final String name;

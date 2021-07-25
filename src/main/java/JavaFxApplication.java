@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 import kit.RenameKit;
@@ -25,9 +26,8 @@ public class JavaFxApplication extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        String path = "/src/main/resources/" + FXML_NAME;
         try {
-            URL resource = getClass().getResource(path);
+            URL resource = getClass().getResource(FXML_NAME);
             if (resource == null) {
                 resource = getClass().getResource(findFxmlFile());
             }

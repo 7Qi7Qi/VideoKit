@@ -12,7 +12,8 @@ public enum VideoSuffixEnum {
     MOV("mov"),
     MP4("mp4"),
     MPEG("mpeg"),
-    RMVB("rmvb");
+    RMVB("rmvb"),
+    WMV("wmv");
 
     private final String extension;
     VideoSuffixEnum(String extension) {

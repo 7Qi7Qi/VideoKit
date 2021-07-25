@@ -18,9 +18,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("ConstantConditions")
-public class VideoKitService {
+public class OtherKitsService {
 
-    public static final Logger logger = LoggerFactory.getLogger(VideoKitService.class);
+    public static final Logger logger = LoggerFactory.getLogger(OtherKitsService.class);
 
     public static void mainVideoFix(String opt, String path) {
         VideoKit videoKit = new VideoKit();
