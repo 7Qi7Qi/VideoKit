@@ -1,6 +1,8 @@
 package kit;
 
 import enums.*;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -54,31 +56,11 @@ public class VideoKit {
             } else if (ProcessTypeEnum.BUILD_LATEST_COVER.equals(typeEnum)) {
                 Arrays.stream(listFiles).forEach(this::createLatestCover);
             } else {
-                for (File folder : listFiles) {
-                    String folderName = folder.getName();
-                    if (folder.isDirectory()) {
-                        //return null when there is no right for the file
-                        Stream<File> fileStream = Arrays.stream(folder.listFiles()).parallel();
-                        switch (typeEnum) {
-                            case CUT_VIDEO:
-                                if (folderName.matches("[0-9]+")) {
-                                    int startSecond = Integer.parseInt(folderName);
-                                    fileStream.forEach(e -> cutFixedCover(e, startSecond));
-                                } else if (!exFileList.contains(folderName)) {
-                                    logger.info("{}'s folder name must only consist of number",
-                                            folder);
-                                }
-                                break;
-                            case FIX_DOWNLOAD:
-                                fileStream.filter(File::isFile).forEach(e -> oneStepService(e, folderName));
-                                break;
-                            default:
-                                logger.warn("{} unknown enum", typeEnum);
-                        }
-                    } else if (folderName.endsWith(FileEnum.TXT_FILE.getName())) {
-                        logger.warn("{} is not a folder", folder.getPath());
-                    }
-                }
+                List<File> allFiles = Arrays.stream(listFiles)
+                        .filter(e -> e.isDirectory() && StringUtils.isNumeric(e.getName()))
+                        .flatMap(e -> Arrays.stream(e.listFiles()))
+                        .collect(Collectors.toList());
+                multiThread(allFiles, typeEnum, 2);
             }
         } else {
             logger.warn("{} does not exist or mainPath name is not #", mainPath);
@@ -110,6 +92,30 @@ public class VideoKit {
             return false;
         }
     }
+    public void multiThread(List<File> allFiles, ProcessTypeEnum typeEnum, Integer threads) {
+        switch (typeEnum) {
+            case CUT_VIDEO:
+//                if (folderName.matches("[0-9]+")) {
+//                    int startSecond = Integer.parseInt(folderName);
+//                    fileStream.forEach(e -> cutFixedCover(e, startSecond));
+//                } else if (!exFileList.contains(folderName)) {
+//                    logger.info("{}'s folder name must only consist of number",
+//                            folder);
+//                }
+//                break;
+            case FIX_DOWNLOAD:
+                int unit = allFiles.size() / threads;
+                for (int i = 0; i < threads; i++) {
+                    final Integer index = i;
+                    new Thread(() -> this.oneStepService(allFiles.subList(unit * index,
+                            Math.min(allFiles.size(), unit * (index + 1))))).start();
+                }
+//                fileStream.filter(File::isFile).forEach(e -> oneStepService(e, folderName));
+                break;
+            default:
+                logger.warn("{} unknown enum", typeEnum);
+        }
+    }
 
     /*****************************************VideoRelated*****************************************/
     /**
@@ -118,16 +124,19 @@ public class VideoKit {
      * 2. cut fix cover
      * 3. build latest video cover
      */
-    public void oneStepService(File file, String parentFolder) {
-        File handleName = renameKit.renameForFile(file);
-        if (StringUtils.isNumeric(parentFolder)) {
-            String cutCover = cutFixedCover(handleName, Integer.parseInt(parentFolder));
-            if (cutCover != null) {
-                String trash = createFolderIfAbsent(handleName, FileEnum.OLD_VIDEO.getName());
-                renameKit.renameFile(handleName, new File(trash + handleName.getName()));
-                String latestCover = createLatestCover(new File(cutCover));
-                if (latestCover != null) {
-                    move2Parent(new File(latestCover), 2);
+    public void oneStepService(List<File> list) {
+        for (File file : list) {
+            String parentFolder = new File(file.getParent()).getName();
+            File handleName = renameKit.renameForFile(file);
+            if (StringUtils.isNumeric(parentFolder)) {
+                String cutCover = cutFixedCover(handleName, Integer.parseInt(parentFolder));
+                if (cutCover != null) {
+                    String trash = createFolderIfAbsent(handleName, FileEnum.OLD_VIDEO.getName());
+                    renameKit.renameFile(handleName, new File(trash + handleName.getName()));
+                    String latestCover = createLatestCover(new File(cutCover));
+                    if (latestCover != null) {
+                        move2Parent(new File(latestCover), 2);
+                    }
                 }
             }
         }
@@ -174,14 +183,6 @@ public class VideoKit {
             logger.warn("{} outputPath existed ", outputPath);
         }
         return null;
-    }
-
-    public void move2Parent(File input, int layer) {
-        File output = input;
-        for (int i = 0; i < layer; i++) {
-            output = new File(new File(output.getParent()).getParent(), input.getName());
-        }
-        renameKit.renameFile(input, output);
     }
 
 
@@ -235,6 +236,18 @@ public class VideoKit {
     }
 
     /***************************************DirectoryRelated***************************************/
+
+    public void move2Parent(File input, int layer) {
+        File output = input;
+        for (int i = 0; i < layer; i++) {
+            output = new File(new File(output.getParent()).getParent(), input.getName());
+        }
+        renameKit.renameFile(input, output);
+    }
+
+    /**
+     * @see org.apache.commons.io.FileUtils#deleteDirectory(File)
+     */
     public void deleteDir(File dir) {
         if (dir.exists()) {
             if (dir.delete()) {
