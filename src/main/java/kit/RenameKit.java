@@ -161,6 +161,8 @@ public class RenameKit {
         boolean result = input.renameTo(output);
         if (!result) {
             logger.warn("{} rename to {} failed", input, output);
+        }else {
+            logger.info("{} rename to {} ", input, output);
         }
         return result ? output : input;
     }

@@ -53,13 +53,17 @@ public class OtherKitsService {
                             File video = fileOptional.get();
                             JSONObject jsonObject = getJSONObject(
                                     new File(folder.getAbsolutePath(), "project.json"));
-                            String videoName = jsonObject.getString("file");
-                            String description = jsonObject.getString("description");
-                            if (StringUtils.isNotBlank(description)) {
-                                bw.write(StringUtils.join(videoName, "--->   ", description, "\n"));
+                            if (jsonObject == null) {
+                                renameKit.renameFile(video, new File(path, video.getName()));
+                            }else {
+                                String videoName = jsonObject.getString("file");
+                                String description = jsonObject.getString("description");
+                                if (StringUtils.isNotBlank(description)) {
+                                    bw.write(StringUtils.join(videoName, "--->   ", description, "\n"));
+                                }
+                                logger.info("get video name from project.json {}", videoName);
+                                renameKit.renameFile(video, new File(path, videoName));
                             }
-                            logger.info("get video name from project.json {}", videoName);
-                            renameKit.renameFile(video, new File(path, videoName));
                         }
                     }
                 }
