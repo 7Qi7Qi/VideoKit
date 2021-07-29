@@ -57,9 +57,10 @@ public class OtherKitsService {
                                 renameKit.renameFile(video, new File(path, video.getName()));
                             }else {
                                 String videoName = jsonObject.getString("file");
-                                String description = jsonObject.getString("description");
-                                if (StringUtils.isNotBlank(description)) {
-                                    bw.write(StringUtils.join(videoName, "--->   ", description, "\n"));
+//                                String description = jsonObject.getString("description");
+                                String title = jsonObject.getString("title");
+                                if (StringUtils.isNotBlank(title)) {
+                                    bw.write(StringUtils.join(videoName, "--->   ", title, "\n"));
                                 }
                                 logger.info("get video name from project.json {}", videoName);
                                 renameKit.renameFile(video, new File(path, videoName));
