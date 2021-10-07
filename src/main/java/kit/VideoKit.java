@@ -2,6 +2,8 @@ package kit;
 
 import enums.*;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.FutureTask;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -104,11 +106,19 @@ public class VideoKit {
 //                }
 //                break;
             case FIX_DOWNLOAD:
-                int unit = allFiles.size() / threads;
+                int unit = (int)Math.ceil(allFiles.size()/(double)threads);
                 for (int i = 0; i < threads; i++) {
-                    final Integer index = i;
+                    final int index = i;
                     new Thread(() -> this.oneStepService(allFiles.subList(unit * index,
                             Math.min(allFiles.size(), unit * (index + 1))))).start();
+//                    FutureTask<String> futureTask = new FutureTask<>(() -> {
+//                        new Thread(() -> this.oneStepService(allFiles.subList(unit * index,
+//                                Math.min(allFiles.size(), unit * (index + 1))))).start();
+//                        return "";
+//                    });
+//                    if (futureTask.isDone()) {
+//                        System.out.println(i + " future task is done");
+//                    }
                 }
 //                fileStream.filter(File::isFile).forEach(e -> oneStepService(e, folderName));
                 break;

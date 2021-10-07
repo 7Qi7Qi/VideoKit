@@ -1,9 +1,7 @@
 package main;
 
 import com.alibaba.fastjson.JSONObject;
-import enums.FileEnum;
-import enums.ProcessTypeEnum;
-import enums.VideoSuffixEnum;
+import enums.*;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -32,7 +30,7 @@ public class OtherKitsService {
         }
     }
 
-    public static void tidyVideos(String path) {
+    public static Result tidyVideos(String path) {
         List<String> videoTypes = VideoSuffixEnum.getAllExtensions();
         RenameKit renameKit = new RenameKit();
         File mainPath = new File(path);
@@ -73,11 +71,14 @@ public class OtherKitsService {
                         logger.info("create export file {} failed", exportFile.getPath());
                     }
                 }
+                return Result.ok();
             } catch (IOException e) {
-                logger.error("file write occur error: " + e.getMessage());
+                logger.error("file write occur error: {}", e.getMessage());
+                return Result.fail().message("file write occur error:" + e.getMessage());
             }
         } else {
             logger.warn("{} does not exist", path);
+            return Result.fail().message(String.format("%s does not exist", path));
         }
     }
 
@@ -93,5 +94,30 @@ public class OtherKitsService {
     public static boolean isSpecificFile(List<String> types, String fileName) {
         String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
         return types.contains(extension.toLowerCase());
+    }
+
+    public static Result lower2Upper(String path) {
+        File mainPath = new File(path);
+        if (mainPath.exists()) {
+            File[] files = mainPath.listFiles();
+            boolean tooLong = Arrays.stream(files).anyMatch(e -> e.getName().length() > 15);
+            if (tooLong) {
+                return Result.fail().message("有文件名字长度大于15 ");
+            }
+
+            for (File file : files) {
+                if (file.isFile()) {
+                    String inputName = file.getName();
+                    int dotIndex = inputName.lastIndexOf('.');
+                    String fileName = inputName.substring(0, dotIndex);
+                    String extension = inputName.substring(dotIndex + 1).toLowerCase();
+
+                    file.renameTo(new File(file.getParent(), fileName.toUpperCase()
+                            + "." + extension));
+                }
+            }
+            return Result.ok();
+        }
+        return Result.fail().message(String.format("%s路径不存在", mainPath.getPath()));
     }
 }

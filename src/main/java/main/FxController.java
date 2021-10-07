@@ -1,13 +1,13 @@
 package main;
 
+import enums.Result;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.function.*;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Alert;
+import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.TextField;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import org.apache.commons.lang3.StringUtils;
@@ -19,10 +19,10 @@ import org.slf4j.LoggerFactory;
 public class FxController implements Initializable {
 
 
-    private Logger LOGGER = LoggerFactory.getLogger(getClass());
+    private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
     @FXML
-    private TextField fileTextField;
+    private ComboBox<String> fileComboBox;
 
     @FXML
     private CheckBox retainOrigin;
@@ -48,55 +48,75 @@ public class FxController implements Initializable {
     }
 
     @FXML
+    void name2Capital() {
+        otherKit(OtherKitsService::lower2Upper);
+    }
+
+    @FXML
     void handlerWallPaper() {
-        String filePath = this.fileTextField.getText();
-        if (StringUtils.isNotBlank(filePath)) {
-            OtherKitsService.tidyVideos(filePath);
-            new Alert(AlertType.INFORMATION, "操作完成",  null).show();
-        }else {
-            new Alert(Alert.AlertType.WARNING, "请先选择文件目录", null).show();
-        }
+        otherKit(OtherKitsService::tidyVideos);
     }
 
     @FXML
     void onOpen() {
-        Stage fileStage = null;
         //FileChooser
         DirectoryChooser directoryChooser = new DirectoryChooser();
-        String filePath = this.fileTextField.getText();
+        String filePath = this.fileComboBox.getValue();
         if (StringUtils.isNotBlank(filePath)) {
             directoryChooser.setInitialDirectory(new File(filePath));
         }
-        File fileSelected = directoryChooser.showDialog(fileStage);
+        File fileSelected = directoryChooser.showDialog(null);
         directoryChooser.setTitle("选择主目录");
         if (fileSelected != null) {
-            fileTextField.setText(fileSelected.getAbsolutePath());
+            fileComboBox.setValue(fileSelected.getAbsolutePath());
+        }
+    }
+
+    public void otherKit(Function<String, Result> kitMethod) {
+        String filePath = this.fileComboBox.getValue();
+        if (StringUtils.isNotBlank(filePath)) {
+            Result result = kitMethod.apply(filePath);
+            if (result.getResult()) {
+                new Alert(AlertType.INFORMATION, "操作完成",  ButtonType.FINISH).show();
+            }else {
+                new Alert(AlertType.WARNING, "操作失败：" + result.getMessage(), ButtonType.CLOSE).show();
+            }
+        }else {
+            new Alert(Alert.AlertType.WARNING, "请先选择文件目录", ButtonType.CLOSE).show();
         }
     }
 
     private void preTreat(String opt) {
-        String filePath = this.fileTextField.getText();
+        String filePath = this.fileComboBox.getValue();
         if (StringUtils.isNotBlank(filePath)) {
             if ( !filePath.endsWith("#")) {
-                new Alert(Alert.AlertType.WARNING, "文件目录必须是 # ", null).show();
+                new Alert(Alert.AlertType.WARNING, "文件目录必须是 # ", ButtonType.CLOSE).show();
             }else {
                 long start = System.currentTimeMillis();
                 LOGGER.info("start video from {} ", start);
                 Alert process = new Alert(AlertType.INFORMATION, "任务执行中", null);
                 process.show();
-                OtherKitsService.mainVideoFix(opt, filePath);
+                try {
+                    OtherKitsService.mainVideoFix(opt, filePath);
+                    long end = System.currentTimeMillis();
+                    LOGGER.info("end video at {}, use {}", end, (end - start));
+                    new Alert(AlertType.INFORMATION, "操作完成",  ButtonType.FINISH).show();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    new Alert(AlertType.ERROR, "操作失败" + e.getMessage(),  ButtonType.CANCEL).show();
+                }
                 process.close();
-                long end = System.currentTimeMillis();
-                LOGGER.info("end video at {}, use {}", end, (end - start));
-                new Alert(AlertType.INFORMATION, "操作完成",  null).show();
             }
         }else {
-            new Alert(Alert.AlertType.WARNING, "请先选择文件目录", null).show();
+            new Alert(Alert.AlertType.WARNING, "请先选择文件目录", ButtonType.CLOSE).show();
         }
     }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        fileTextField.setText("F:\\迅雷\\#");
+        fileComboBox.setEditable(true);
+        fileComboBox.getItems().add("F:\\迅雷\\#");
+        fileComboBox.getItems().add("D:\\Archives\\#");
+        fileComboBox.setValue("F:\\迅雷\\#");
     }
 }
