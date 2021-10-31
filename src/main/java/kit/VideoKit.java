@@ -28,7 +28,6 @@ import java.util.stream.Stream;
  * @date 2020-12-30 13:20:11
  */
 
-//@SuppressWarnings("unused")
 @SuppressWarnings({"ConstantConditions"})
 public class VideoKit {
 
@@ -36,10 +35,6 @@ public class VideoKit {
     private final static List<String> exFileList = Arrays.asList("words.txt", "regex.txt", "rename",
             "output", "cover", "ignore");
     private final static RenameKit renameKit = new RenameKit();
-
-    public void batchProcess(String pathName) {
-        batchProcess(pathName, null);
-    }
 
     public void batchProcess(String pathName, ProcessTypeEnum typeEnum) {
         File mainPath = new File(pathName);
@@ -62,7 +57,8 @@ public class VideoKit {
                         .filter(e -> e.isDirectory() && StringUtils.isNumeric(e.getName()))
                         .flatMap(e -> Arrays.stream(e.listFiles()))
                         .collect(Collectors.toList());
-                multiThread(allFiles, typeEnum, 2);
+//                multiThread(allFiles, typeEnum, 2);
+                this.oneStepService(allFiles);
             }
         } else {
             logger.warn("{} does not exist or mainPath name is not #", mainPath);
@@ -73,27 +69,29 @@ public class VideoKit {
 
     public boolean executeCommand(String command) {
         Process process;
-//    StringBuilder ret = new StringBuilder();
         try {
             process = Runtime.getRuntime().exec(command);
             InputStream is = process.getErrorStream();
             InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
             BufferedReader reader = new BufferedReader(isr);
             String line = "";
-            while (process.isAlive() && (line = reader.readLine()) != null) {
+//            while (process.isAlive() && (line = reader.readLine()) != null) {
 //        if (line.contains("Mainconcept MP4 Sound Media Handler")) {
 //          process.destroyForcibly();
 //          logger.warn("{} {} execute block, destroy forcibly", command);
 //          return false;
 //        }
 //        System.out.println(line);
-            }
+//            }
+            logger.info("===> {}", command);
             return true;
         } catch (IOException e) {
             logger.warn("{} execute occur exception => {}", command, e.getMessage());
             return false;
         }
     }
+
+    @Deprecated
     public void multiThread(List<File> allFiles, ProcessTypeEnum typeEnum, Integer threads) {
         switch (typeEnum) {
             case CUT_VIDEO:

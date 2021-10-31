@@ -15,7 +15,7 @@ public enum FFMPEGEnum {
      *       encoders ; -c copy direct copy, not encode again
      * @notice FFmpeg cannot edit existing files in-place. input should not be same as output Path
      */
-
+//  -threads 4 -preset ultrafast
     FFMPEG_PATH("FFMPEG System Environment Path", "ffmpeg "),
     SIMPLE_CLIP("IN-START-END-OUT", " -ss %s -i \"%s\" -to %s -c copy \"%s\""),
     CREATE_COVER("TIME-IN-OUT", " -ss %s -i \"%s\" -vframes 1 -q:v 1 \"%s\""),

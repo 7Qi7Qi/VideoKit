@@ -2,14 +2,15 @@ package main;
 
 import enums.Result;
 import java.net.URL;
+import java.util.Date;
 import java.util.ResourceBundle;
 import java.util.function.*;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
 import javafx.stage.DirectoryChooser;
-import javafx.stage.Stage;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
@@ -77,7 +78,7 @@ public class FxController implements Initializable {
         if (StringUtils.isNotBlank(filePath)) {
             Result result = kitMethod.apply(filePath);
             if (result.getResult()) {
-                new Alert(AlertType.INFORMATION, "操作完成",  ButtonType.FINISH).show();
+                alertAutoClose(null);
             }else {
                 new Alert(AlertType.WARNING, "操作失败：" + result.getMessage(), ButtonType.CLOSE).show();
             }
@@ -93,14 +94,14 @@ public class FxController implements Initializable {
                 new Alert(Alert.AlertType.WARNING, "文件目录必须是 # ", ButtonType.CLOSE).show();
             }else {
                 long start = System.currentTimeMillis();
-                LOGGER.info("start video from {} ", start);
+                LOGGER.info("Start operation from {} ", new Date(start));
                 Alert process = new Alert(AlertType.INFORMATION, "任务执行中", null);
                 process.show();
                 try {
                     OtherKitsService.mainVideoFix(opt, filePath);
                     long end = System.currentTimeMillis();
-                    LOGGER.info("end video at {}, use {}", end, (end - start));
-                    new Alert(AlertType.INFORMATION, "操作完成",  ButtonType.FINISH).show();
+                    LOGGER.info("Finish operation at {}, use {}s", new Date(end), (end - start)/1000);
+                    this.alertAutoClose(null);
                 } catch (Exception e) {
                     e.printStackTrace();
                     new Alert(AlertType.ERROR, "操作失败" + e.getMessage(),  ButtonType.CANCEL).show();
@@ -118,5 +119,28 @@ public class FxController implements Initializable {
         fileComboBox.getItems().add("F:\\迅雷\\#");
         fileComboBox.getItems().add("D:\\Archives\\#");
         fileComboBox.setValue("F:\\迅雷\\#");
+    }
+
+
+    public void alertAutoClose(String contentText) {
+        if (contentText == null) {
+            contentText = "操作完成";
+        }
+        Alert alert = new Alert(AlertType.INFORMATION, contentText, ButtonType.FINISH);
+        alert.show();
+        Thread autoClose = new Thread(() -> {
+            try {
+                Thread.sleep(3000);
+                Platform.runLater(() -> {
+                    if (alert.isShowing()) {
+                        alert.close();
+                    }
+                });
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+        autoClose.setDaemon(true);
+        autoClose.start();
     }
 }
