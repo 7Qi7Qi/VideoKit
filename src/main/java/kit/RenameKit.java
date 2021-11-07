@@ -44,7 +44,7 @@ public class RenameKit {
                 }
                 if ("torrent".equals(result.getKey())) {
                     if (!input.delete()) {
-                        logger.info("{} fail to delete", input);
+                        logger.info("【{}】 fail to delete", input);
                     }
                 }
             }
@@ -97,7 +97,7 @@ public class RenameKit {
                     e.printStackTrace();
                 }
             } else {
-                logger.warn("{} not exist, custom words add nothing", file.getAbsolutePath());
+                logger.warn("【{}】 not exist, custom words add nothing", file.getAbsolutePath());
             }
         }
     }
@@ -150,7 +150,7 @@ public class RenameKit {
 
     public File renameFile(File input, File output) {
         if (output.exists()) {
-            logger.warn("{} already exists, {} rename failed", output.getAbsolutePath(),
+            logger.warn("【{}】 already exists, 【{}】 rename failed", output.getAbsolutePath(),
                     input.getAbsolutePath());
             File duplicate = new File(output.getParent() + "/duplicate");
             if (!duplicate.exists()) {
@@ -160,9 +160,9 @@ public class RenameKit {
         }
         boolean result = input.renameTo(output);
         if (!result) {
-            logger.warn("{} rename to {} failed", input, output);
+            logger.error("【{}】 rename to 【{}】 failed", input, output);
         }else {
-            logger.info("{} rename to {} ", input, output);
+            logger.info("【{}】 rename to 【{}】 ", input, output);
         }
         return result ? output : input;
     }
@@ -256,7 +256,7 @@ public class RenameKit {
         try {
             str = FileUtils.readFileToString(file, "UTF-8");
         }catch (IOException e) {
-            logger.error("{} read file failed", file.getAbsolutePath());
+            logger.error("【{}】 read file failed", file.getAbsolutePath());
         }
         return str;
     }

@@ -61,10 +61,9 @@ public class VideoKit {
                 this.oneStepService(allFiles);
             }
         } else {
-            logger.warn("{} does not exist or mainPath name is not #", mainPath);
+            logger.warn("【{}】 does not exist or mainPath name is not #", mainPath);
         }
     }
-
 
 
     public boolean executeCommand(String command) {
@@ -74,19 +73,15 @@ public class VideoKit {
             InputStream is = process.getErrorStream();
             InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
             BufferedReader reader = new BufferedReader(isr);
-            String line = "";
-//            while (process.isAlive() && (line = reader.readLine()) != null) {
-//        if (line.contains("Mainconcept MP4 Sound Media Handler")) {
-//          process.destroyForcibly();
-//          logger.warn("{} {} execute block, destroy forcibly", command);
-//          return false;
-//        }
-//        System.out.println(line);
-//            }
-            logger.info("===> {}", command);
+            String line;
+            // ensure command executed and execute down
+            while (process.isAlive() && (line = reader.readLine()) != null) {
+//                System.out.println(line);
+            }
+            logger.info("===> 【{}】", command);
             return true;
         } catch (IOException e) {
-            logger.warn("{} execute occur exception => {}", command, e.getMessage());
+            logger.warn("【{}】 occur exception => 【{}】", command, e.getMessage());
             return false;
         }
     }
@@ -99,12 +94,12 @@ public class VideoKit {
 //                    int startSecond = Integer.parseInt(folderName);
 //                    fileStream.forEach(e -> cutFixedCover(e, startSecond));
 //                } else if (!exFileList.contains(folderName)) {
-//                    logger.info("{}'s folder name must only consist of number",
+//                    logger.info("【{}】's folder name must only consist of number",
 //                            folder);
 //                }
 //                break;
             case FIX_DOWNLOAD:
-                int unit = (int)Math.ceil(allFiles.size()/(double)threads);
+                int unit = (int) Math.ceil(allFiles.size() / (double) threads);
                 for (int i = 0; i < threads; i++) {
                     final int index = i;
                     new Thread(() -> this.oneStepService(allFiles.subList(unit * index,
@@ -121,27 +116,25 @@ public class VideoKit {
 //                fileStream.filter(File::isFile).forEach(e -> oneStepService(e, folderName));
                 break;
             default:
-                logger.warn("{} unknown enum", typeEnum);
+                logger.warn("【{}】 unknown enum", typeEnum);
         }
     }
 
     /*****************************************VideoRelated*****************************************/
     /**
-     * one step to handle downloaded video
-     * 1. handle file name, remove redundant string words in video name
-     * 2. cut fix cover
-     * 3. build latest video cover
+     * one step to handle downloaded video 1. handle file name, remove redundant string words in
+     * video name 2. cut fix cover 3. build latest video cover
      */
     public void oneStepService(List<File> list) {
         for (File file : list) {
             String parentFolder = new File(file.getParent()).getName();
             File handleName = renameKit.renameForFile(file);
             if (StringUtils.isNumeric(parentFolder)) {
-                String cutCover = cutFixedCover(handleName, Integer.parseInt(parentFolder));
-                if (cutCover != null) {
+                String coverCutVideo = cutFixedCover(handleName, Integer.parseInt(parentFolder));
+                if (coverCutVideo != null) {
                     String trash = createFolderIfAbsent(handleName, FileEnum.OLD_VIDEO.getName());
                     renameKit.renameFile(handleName, new File(trash + handleName.getName()));
-                    String latestCover = createLatestCover(new File(cutCover));
+                    String latestCover = createLatestCover(new File(coverCutVideo));
                     if (latestCover != null) {
                         move2Parent(new File(latestCover), 2);
                     }
@@ -164,8 +157,8 @@ public class VideoKit {
 //      VideoInfo video = info.getVideo();
             duration = info.getDuration();
         } catch (EncoderException e) {
-            logger.warn("{} get video length occur exception => {}", file.getName(),
-                            e.getMessage());
+            logger.warn("【{}】 get video length occur exception => 【{}】", file.getName(),
+                    e.getMessage());
         }
         return duration;
     }
@@ -184,35 +177,35 @@ public class VideoKit {
             String command = String.format(FFMPEGEnum.SIMPLE_CLIP.normalCMD(), start,
                     file.getAbsolutePath(), end, outputPath);
             if (executeCommand(command)) {
-                logger.info("{} cut cover start from {} seconds", file.getAbsolutePath(), start);
+                logger.info("【{}】 cut cover start from 【{}】 seconds", file.getAbsolutePath(),
+                        start);
                 return outputPath;
             }
         } else {
-            logger.warn("{} outputPath existed ", outputPath);
+            logger.warn("【{}】 outputPath existed ", outputPath);
         }
         return null;
     }
 
 
-
     /****************************************PictureRelated****************************************/
     public String captureCover(File file) {
         if (file.isDirectory()) {
-            logger.warn("{} capture cover failed, since parameter file is a directory",
+            logger.warn("【{}】 capture cover failed, since parameter file is a directory",
                     file.getAbsolutePath());
         } else {
             String videoName = file.getName().substring(0, file.getName().lastIndexOf("."));
             String outputName = createFolderIfAbsent(file, FileEnum.COVER_FOLDER.getName());
-            outputName += FileEnum.SEPARATOR.getName() + videoName + ".jpg";
+            outputName += videoName + ".jpg";
             if (fileNotExist(outputName)) {
                 String command = String.format(FFMPEGEnum.CREATE_COVER.normalCMD(), 6,
                         file.getAbsolutePath(), outputName);
                 if (executeCommand(command)) {
-                    logger.info("{} capture cover succeed", file.getAbsolutePath());
+                    logger.info("【{}】 capture cover succeed", file.getAbsolutePath());
                     return outputName;
                 }
             } else {
-                logger.warn("{} outputPath existed ", outputName);
+                logger.warn("【{}】 outputPath existed ", outputName);
             }
         }
         return null;
@@ -230,11 +223,11 @@ public class VideoKit {
             String command = String
                     .format(FFMPEGEnum.REPLACE_COVER.normalCMD(), file, coverPath, outputPath);
             if (executeCommand(command)) {
-                logger.info("{} replace cover", file.getAbsolutePath());
+                logger.info("【{}】 replace cover", file.getAbsolutePath());
                 return outputPath;
             }
         } else {
-            logger.warn("{} outputPath existed ", outputPath);
+            logger.warn("【{}】 outputPath existed ", outputPath);
         }
         return null;
     }
@@ -259,12 +252,12 @@ public class VideoKit {
     public void deleteDir(File dir) {
         if (dir.exists()) {
             if (dir.delete()) {
-                logger.warn("Successfully delete the directory {}", dir);
+                logger.warn("Successfully delete the directory 【{}】", dir);
             } else {
-                logger.warn("Failed to delete the directory {}", dir);
+                logger.warn("Failed to delete the directory 【{}】", dir);
             }
         } else {
-            logger.warn("There is no {}", dir);
+            logger.warn("There is no 【{}】", dir);
         }
 
     }
@@ -295,11 +288,11 @@ public class VideoKit {
             createFolderIfAbsent(outputPath);
         } else {
             if (sourceFile.mkdir()) {
-                logger.info("{} source path does not exist, has created it first",
+                logger.info("【{}】 has been created first",
                         sourceFile.getAbsolutePath());
                 outputPath = createFolderIfAbsent(sourceFile, folder);
             } else {
-                logger.warn("fail to create {}", sourceFile.getAbsolutePath());
+                logger.warn("fail to create 【{}】", sourceFile.getAbsolutePath());
             }
         }
         return outputPath;
@@ -309,9 +302,9 @@ public class VideoKit {
         File file = new File(filePath);
         if (!file.exists()) {
             if (file.mkdir()) {
-                logger.info("succeed to create folder: {}", file.getAbsolutePath());
+                logger.info("succeed to create folder: 【{}】", file.getAbsolutePath());
             } else {
-                logger.warn("fail to create folder: {}", file.getAbsolutePath());
+                logger.warn("fail to create folder: 【{}】", file.getAbsolutePath());
             }
         }
     }
