@@ -116,9 +116,9 @@ public class FxController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         fileComboBox.setEditable(true);
-        fileComboBox.getItems().add("F:\\迅雷\\#");
+        fileComboBox.getItems().add("G:\\迅雷\\#");
         fileComboBox.getItems().add("D:\\Archives\\#");
-        fileComboBox.setValue("F:\\迅雷\\#");
+        fileComboBox.setValue("G:\\迅雷\\#");
     }
 
 
