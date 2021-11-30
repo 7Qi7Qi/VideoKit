@@ -37,14 +37,16 @@ public class RenameKit {
             List<String> extensions = VideoSuffixEnum.getAllExtensions();
             File[] files = file.listFiles();
             for (File input : files) {
-                Pair<String, String> result = this.renameInnerOpt(input, extensions);
-                String nameAfterFix = result.getValue();
-                if (nameAfterFix != null) {
-                    renameFileInFolder(input, nameAfterFix, 1);
-                }
-                if ("torrent".equals(result.getKey())) {
-                    if (!input.delete()) {
-                        logger.info("【{}】 fail to delete", input);
+                if (input.isFile()) {
+                    Pair<String, String> result = this.renameInnerOpt(input, extensions);
+                    String nameAfterFix = result.getValue();
+                    if (nameAfterFix != null) {
+                        renameFileInFolder(input, nameAfterFix, 1);
+                    }
+                    if ("torrent".equals(result.getKey())) {
+                        if (!input.delete()) {
+                            logger.info("【{}】 fail to delete", input);
+                        }
                     }
                 }
             }
