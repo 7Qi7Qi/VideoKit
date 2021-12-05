@@ -2,42 +2,75 @@ package kit;
 
 public class ProgressBarKit {
 
-    private int index = 0;
+    private static final int PROGRESS_SIZE = 50;
+    private final int RATE;
+    private final int SPEED;
+    private final long interval;
+
     private String finish;
     private String unFinish;
+    private String target;
 
+    public static class Builder {
 
-    // 进度条粒度
-    private final int PROGRESS_SIZE = 50;
-    private int BITE = 2;
+        private int rate = 2;
+        private int speed = 1;
+        private long interval = 50L;
 
-    private String getNChar(int num, char ch){
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < num; i++) {
-            builder.append(ch);
+        public Builder(){}
+
+        public Builder rate(int rate) {
+            this.rate = rate;
+            return this;
         }
-        return builder.toString();
+        public Builder speed(int speed) {
+            this.speed = speed;
+            return this;
+        }
+        public Builder waitMs(int interval) {
+            this.interval = interval;
+            return this;
+        }
+
+        public ProgressBarKit builder() {
+            return new ProgressBarKit(this);
+        }
     }
 
-    public void printProgress() throws InterruptedException {
+    private ProgressBarKit(Builder builder) {
+        this.RATE = builder.rate;
+        this.SPEED = builder.speed;
+        this.interval = builder.interval;
+        this.refresh();
+    }
+
+    public void refresh() {
         System.out.print("Progress:");
-
-        finish = getNChar(index / BITE, '█');
-        unFinish = getNChar(PROGRESS_SIZE - index / BITE, '─');
-        String target = String.format("%3d%%[%s%s]", index, finish, unFinish);
+        unFinish = getNChar(PROGRESS_SIZE, '─');
+        finish = getNChar(0, '█');
+        target = String.format("%3d%%[%s%s]", 0, finish, unFinish);
         System.out.print(target);
+    }
 
-        while (index <= 100){
-            finish = getNChar(index / BITE, '█');
-            unFinish = getNChar(PROGRESS_SIZE - index / BITE, '─');
-
-            target = String.format("%3d%%├%s%s┤", index, finish, unFinish);
-            System.out.print(getNChar(PROGRESS_SIZE + 6, '\b'));
-            System.out.print(target);
-
-            Thread.sleep(50);
-            index++;
+    public void printProgress(int index) {
+        unFinish = getNChar(PROGRESS_SIZE - index / RATE * SPEED, '─');
+        finish = getNChar(index / RATE * SPEED, '█');
+        if (index * SPEED > 100) {
+            return;
         }
+        target = String.format("%3d%%├%s%s┤", index * SPEED, finish, unFinish);
+        System.out.print(getNChar(PROGRESS_SIZE + 6, '\b') + target);
+        try {
+            Thread.sleep(interval);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+    private String getNChar(int num, char ch){
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < num; i++) {
+            sb.append(ch);
+        }
+        return sb.toString();
     }
 }
-

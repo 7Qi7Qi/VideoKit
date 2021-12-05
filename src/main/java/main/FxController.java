@@ -1,6 +1,7 @@
 package main;
 
 import enums.Result;
+import java.io.PrintStream;
 import java.net.URL;
 import java.util.Date;
 import java.util.ResourceBundle;
@@ -11,6 +12,8 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
 import javafx.stage.DirectoryChooser;
+import kit.*;
+import kit.ProgressBarKit.Builder;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
@@ -22,11 +25,16 @@ public class FxController implements Initializable {
 
     private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
+    private PrintStream ps;
+
     @FXML
     private ComboBox<String> fileComboBox;
 
     @FXML
     private CheckBox retainOrigin;
+
+    @FXML
+    private TextArea outputText;
 
     @FXML
     void handlerDownload() {
@@ -71,6 +79,11 @@ public class FxController implements Initializable {
         if (fileSelected != null) {
             fileComboBox.setValue(fileSelected.getAbsolutePath());
         }
+    }
+
+    @FXML
+    void testMethod() {
+        System.out.println("LOGGER = " + LOGGER);
     }
 
     public void otherKit(Function<String, Result> kitMethod) {
@@ -119,6 +132,11 @@ public class FxController implements Initializable {
         fileComboBox.getItems().add("G:\\迅雷\\#");
         fileComboBox.getItems().add("D:\\Archives\\#");
         fileComboBox.setValue("G:\\迅雷\\#");
+        outputText.setWrapText(true);
+        //重定向输出流
+        ps = new ConsolePrint(outputText);
+        System.setOut(ps);
+        System.setErr(ps);
     }
 
 

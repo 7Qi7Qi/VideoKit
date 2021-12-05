@@ -2,10 +2,8 @@ package kit;
 
 import enums.VideoSuffixEnum;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.function.Predicate;
+import java.util.*;
+import java.util.function.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,6 +11,13 @@ import org.slf4j.LoggerFactory;
 public class UnusedKit {
 
     public final Logger logger = LoggerFactory.getLogger(getClass());
+
+    public static void testOutputKit(Consumer<String> function) {
+
+        for (int i = 0; i < 20; i++) {
+            function.accept(i + " ======> " + new Date());
+        }
+    }
 
 
     public File correctFile(File input) {

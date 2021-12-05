@@ -69,6 +69,7 @@ public class VideoKit {
     public boolean executeCommand(String command) {
         Process process;
         try {
+            logger.info("===> 【{}】", command);
             process = Runtime.getRuntime().exec(command);
             InputStream is = process.getErrorStream();
             InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
@@ -78,7 +79,6 @@ public class VideoKit {
             while (process.isAlive() && (line = reader.readLine()) != null) {
 //                System.out.println(line);
             }
-            logger.info("===> 【{}】", command);
             return true;
         } catch (IOException e) {
             logger.warn("【{}】 occur exception => 【{}】", command, e.getMessage());
