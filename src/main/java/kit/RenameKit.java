@@ -31,6 +31,7 @@ public class RenameKit {
     public static Logger logger = LoggerFactory.getLogger(RenameKit.class);
 
     public void renameForAll(File file) {
+        //file in first layer will not remove
         if (file.isFile()) {
             renameForFile(file);
         }else {
@@ -40,14 +41,18 @@ public class RenameKit {
                 if (input.isFile()) {
                     Pair<String, String> result = this.renameInnerOpt(input, extensions);
                     String nameAfterFix = result.getValue();
-                    if (nameAfterFix != null) {
-                        renameFileInFolder(input, nameAfterFix, 1);
-                    }
+                    renameFileInFolder(input, nameAfterFix != null ? nameAfterFix : input.getName(), 1);
                     if ("torrent".equals(result.getKey())) {
                         if (!input.delete()) {
                             logger.info("【{}】 fail to delete", input);
                         }
                     }
+                }
+            }
+            File[] newFiles = file.listFiles();
+            if (newFiles.length == 0) {
+                if (file.delete()) {
+                    logger.info("【{}】 has been deleted, because it is empty ", file);
                 }
             }
         }
@@ -145,7 +150,7 @@ public class RenameKit {
         if (input.toLowerCase().matches("[\\w]{3,4}-[\\d]{3,4}(-c)?")) {
             input = input.toUpperCase();
         }
-        return input;
+        return input.trim();
     }
 
 
