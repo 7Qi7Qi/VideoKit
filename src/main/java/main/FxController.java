@@ -82,6 +82,11 @@ public class FxController implements Initializable {
     }
 
     @FXML
+    void clearOutput() {
+        outputText.clear();
+    }
+
+    @FXML
     void testMethod() {
         System.out.println("LOGGER = " + LOGGER);
     }

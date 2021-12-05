@@ -64,6 +64,7 @@
             <ComboBox fx:id="fileComboBox" layoutX="297.0" layoutY="56.0" prefHeight="49.0" prefWidth="334.0" promptText="显示选择的文件路径" />
             <TextArea fx:id="outputText" layoutX="130.0" layoutY="382.0" prefHeight="164.0" prefWidth="689.0" promptText="日志输出" />
             <Button fx:id="testBtn" layoutX="835.0" layoutY="434.0" mnemonicParsing="false" onAction="#testMethod" text="测试按钮" />
+            <Button fx:id="clearBtn" layoutX="835.0" layoutY="486.0" mnemonicParsing="false" onAction="#clearOutput" text="清空输出" />
         </children>
      </AnchorPane>
    </children>
