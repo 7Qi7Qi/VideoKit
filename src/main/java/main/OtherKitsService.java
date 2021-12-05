@@ -26,7 +26,8 @@ public class OtherKitsService {
         if (typeEnum == null) {
             System.out.println("Unknown Operation");
         } else {
-            videoKit.batchProcess(path, typeEnum);
+            Thread thread = new Thread(() -> videoKit.batchProcess(path, typeEnum));
+            thread.start();
         }
     }
 
