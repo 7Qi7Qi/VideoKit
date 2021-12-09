@@ -41,7 +41,7 @@ public class RenameKit {
                 if (input.isFile()) {
                     Pair<String, String> result = this.renameInnerOpt(input, extensions);
                     String nameAfterFix = result.getValue();
-                    renameFileInFolder(input, nameAfterFix != null ? nameAfterFix : input.getName(), 1);
+                    renameFileInFolder(input, nameAfterFix == null ? nameAfterFix : input.getName(), 1);
                     if ("torrent".equals(result.getKey())) {
                         if (!input.delete()) {
                             logger.info("【{}】 fail to delete", input);

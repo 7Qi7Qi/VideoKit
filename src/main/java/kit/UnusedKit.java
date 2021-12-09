@@ -20,7 +20,7 @@ public class UnusedKit {
     }
 
     public static void testLogger() {
-        logger.debug("logger debug " + new Date());
+        logger.debug("logger debug 测试测试" + new Date());
         logger.info("logger info " + new Date());
         logger.warn("logger warn " + new Date());
         logger.error("logger error " + new Date());

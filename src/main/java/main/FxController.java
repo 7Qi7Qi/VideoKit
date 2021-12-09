@@ -3,6 +3,8 @@ package main;
 import enums.Result;
 import java.io.*;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.ResourceBundle;
 import java.util.function.*;
@@ -98,8 +100,6 @@ public class FxController implements Initializable {
 //            for (int i = 0; i < 10; i++) {
 //                System.out.println("index  ======= " + i);
 //            }
-            CustomLog4jAppender appender = new CustomLog4jAppender();
-
             UnusedKit.testLogger();
         }).start();
 
@@ -156,7 +156,11 @@ public class FxController implements Initializable {
         //重定向输出流
 //        ps = new ConsolePrint(outputText);
         OutputStream os = new ConsoleOutput(outputText);
-        ps = new PrintStream(os);
+        try {
+            ps = new PrintStream(os, true, StandardCharsets.UTF_8.name());
+        } catch (UnsupportedEncodingException e) {
+            LOGGER.error(e.getMessage());
+        }
         System.setOut(ps);
         System.setErr(ps);
     }
