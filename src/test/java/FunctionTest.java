@@ -10,7 +10,7 @@ public class FunctionTest {
     public static File file;
     @Before
     public void init() {
-        String path = "G:\\迅雷\\#";
+        String path = "G:\\#";
         file = new File(path);
     }
 
@@ -38,9 +38,5 @@ public class FunctionTest {
     }
 
     public static void main(String[] args) {
-        long start = System.currentTimeMillis();
-        VideoKit videoKit = new VideoKit();
-        videoKit.batchProcess("G:\\迅雷\\#", ProcessTypeEnum.FIX_DOWNLOAD);
-        System.out.println(System.currentTimeMillis() - start);
     }
 }

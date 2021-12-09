@@ -1,6 +1,6 @@
+make above code more readable
 
-
-## Usage Instruction
+## Direction
 
 **Essential: Run under a directory structure like following**
 ```
@@ -17,3 +17,6 @@
 ├── rename
 └── ignore
 ```
+
+## Other
+    + The application will start a new thread so that running smoothly

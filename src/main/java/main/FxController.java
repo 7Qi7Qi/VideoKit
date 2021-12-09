@@ -1,7 +1,7 @@
 package main;
 
 import enums.Result;
-import java.io.PrintStream;
+import java.io.*;
 import java.net.URL;
 import java.util.Date;
 import java.util.ResourceBundle;
@@ -12,13 +12,13 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
 import javafx.stage.DirectoryChooser;
-import kit.*;
-import kit.ProgressBarKit.Builder;
+import kit.ProgressBarKit;
+import kit.UnusedKit;
 import org.apache.commons.lang3.StringUtils;
 
-import java.io.File;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import output.*;
 
 public class FxController implements Initializable {
 
@@ -88,7 +88,21 @@ public class FxController implements Initializable {
 
     @FXML
     void testMethod() {
-        System.out.println("LOGGER = " + LOGGER);
+        new Thread(() -> {
+//            System.out.println("LOGGER = " + LOGGER);
+//            ProgressBarKit builder = new Builder().waitMs(100).builder();
+//            for (int i = 0; i < 100; i++) {
+//                builder.printProgress(i);
+//            }
+//            System.out.println("LOGGER = " + LOGGER);
+//            for (int i = 0; i < 10; i++) {
+//                System.out.println("index  ======= " + i);
+//            }
+            CustomLog4jAppender appender = new CustomLog4jAppender();
+
+            UnusedKit.testLogger();
+        }).start();
+
     }
 
     public void otherKit(Function<String, Result> kitMethod) {
@@ -97,10 +111,11 @@ public class FxController implements Initializable {
             Result result = kitMethod.apply(filePath);
             if (result.getResult()) {
                 alertAutoClose(null);
-            }else {
-                new Alert(AlertType.WARNING, "操作失败：" + result.getMessage(), ButtonType.CLOSE).show();
+            } else {
+                new Alert(AlertType.WARNING, "操作失败：" + result.getMessage(),
+                        ButtonType.CLOSE).show();
             }
-        }else {
+        } else {
             new Alert(Alert.AlertType.WARNING, "请先选择文件目录", ButtonType.CLOSE).show();
         }
     }
@@ -108,9 +123,9 @@ public class FxController implements Initializable {
     private void preTreat(String opt) {
         String filePath = this.fileComboBox.getValue();
         if (StringUtils.isNotBlank(filePath)) {
-            if ( !filePath.endsWith("#")) {
+            if (!filePath.endsWith("#")) {
                 new Alert(Alert.AlertType.WARNING, "文件目录必须是 # ", ButtonType.CLOSE).show();
-            }else {
+            } else {
                 long start = System.currentTimeMillis();
                 LOGGER.info("Start operation from {} ", new Date(start));
                 Alert process = new Alert(AlertType.INFORMATION, "任务执行中", null);
@@ -118,15 +133,15 @@ public class FxController implements Initializable {
                 try {
                     OtherKitsService.mainVideoFix(opt, filePath);
                     long end = System.currentTimeMillis();
-                    LOGGER.info("Finish operation at {}, use {}s", new Date(end), (end - start)/1000);
+                    LOGGER.info("Finish operation at {}, use {}s", new Date(end), (end - start) / 1000);
                     this.alertAutoClose(null);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    new Alert(AlertType.ERROR, "操作失败" + e.getMessage(),  ButtonType.CANCEL).show();
+                    new Alert(AlertType.ERROR, "操作失败" + e.getMessage(), ButtonType.CANCEL).show();
                 }
                 process.close();
             }
-        }else {
+        } else {
             new Alert(Alert.AlertType.WARNING, "请先选择文件目录", ButtonType.CLOSE).show();
         }
     }
@@ -139,7 +154,9 @@ public class FxController implements Initializable {
         fileComboBox.setValue("G:\\迅雷\\#");
         outputText.setWrapText(true);
         //重定向输出流
-        ps = new ConsolePrint(outputText);
+//        ps = new ConsolePrint(outputText);
+        OutputStream os = new ConsoleOutput(outputText);
+        ps = new PrintStream(os);
         System.setOut(ps);
         System.setErr(ps);
     }

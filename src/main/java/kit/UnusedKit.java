@@ -10,13 +10,20 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("unused")
 public class UnusedKit {
 
-    public final Logger logger = LoggerFactory.getLogger(getClass());
+    public static final Logger logger = LoggerFactory.getLogger(UnusedKit.class);
 
     public static void testOutputKit(Consumer<String> function) {
 
         for (int i = 0; i < 20; i++) {
             function.accept(i + " ======> " + new Date());
         }
+    }
+
+    public static void testLogger() {
+        logger.debug("logger debug " + new Date());
+        logger.info("logger info " + new Date());
+        logger.warn("logger warn " + new Date());
+        logger.error("logger error " + new Date());
     }
 
 
