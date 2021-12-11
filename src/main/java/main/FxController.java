@@ -155,12 +155,7 @@ public class FxController implements Initializable {
         outputText.setWrapText(true);
         //重定向输出流
 //        ps = new ConsolePrint(outputText);
-        OutputStream os = new ConsoleOutput(outputText);
-        try {
-            ps = new PrintStream(os, true, StandardCharsets.UTF_8.name());
-        } catch (UnsupportedEncodingException e) {
-            LOGGER.error(e.getMessage());
-        }
+        ps = new PrintStream(new ConsoleOutput(outputText));
         System.setOut(ps);
         System.setErr(ps);
     }
