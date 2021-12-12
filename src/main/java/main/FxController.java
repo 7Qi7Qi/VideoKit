@@ -26,14 +26,23 @@ public class FxController implements Initializable {
 
 
     private final Logger LOGGER = LoggerFactory.getLogger(getClass());
+    private SingleSelectionModel<Tab> selectionMode;
 
-    private PrintStream ps;
+    @FXML
+    private TabPane mainTabPane;
+
+    @FXML
+    private Tab mainTab;
 
     @FXML
     private ComboBox<String> fileComboBox;
 
     @FXML
     private CheckBox retainOrigin;
+
+    @FXML
+    private Tab logTab;
+
 
     @FXML
     private TextArea outputText;
@@ -86,23 +95,26 @@ public class FxController implements Initializable {
     @FXML
     void clearOutput() {
         outputText.clear();
+        selectionMode.select(mainTab);
     }
 
     @FXML
     void testMethod() {
         new Thread(() -> {
-//            System.out.println("LOGGER = " + LOGGER);
-//            ProgressBarKit builder = new Builder().waitMs(100).builder();
-//            for (int i = 0; i < 100; i++) {
-//                builder.printProgress(i);
-//            }
-//            System.out.println("LOGGER = " + LOGGER);
-//            for (int i = 0; i < 10; i++) {
-//                System.out.println("index  ======= " + i);
-//            }
+            System.out.println("LOGGER = " + LOGGER);
+            ProgressBarKit builder = new ProgressBarKit.Builder().waitMs(100).builder();
+            for (int i = 0; i < 100; i++) {
+                builder.printProgress(i);
+            }
+            System.out.println("LOGGER = " + LOGGER);
             UnusedKit.testLogger();
         }).start();
+    }
 
+    @FXML
+    void mainTest() {
+        selectionMode.select(logTab);
+        this.testMethod();
     }
 
     public void otherKit(Function<String, Result> kitMethod) {
@@ -154,10 +166,10 @@ public class FxController implements Initializable {
         fileComboBox.setValue("G:\\迅雷\\#");
         outputText.setWrapText(true);
         //重定向输出流
-//        ps = new ConsolePrint(outputText);
-        ps = new PrintStream(new ConsoleOutput(outputText));
+        PrintStream ps = new PrintStream(new ConsoleOutput(outputText));
         System.setOut(ps);
         System.setErr(ps);
+        selectionMode = mainTabPane.getSelectionModel();
     }
 
 
