@@ -43,7 +43,6 @@ public class FxController implements Initializable {
     @FXML
     private Tab logTab;
 
-
     @FXML
     private TextArea outputText;
 
@@ -102,8 +101,8 @@ public class FxController implements Initializable {
     void testMethod() {
         new Thread(() -> {
             System.out.println("LOGGER = " + LOGGER);
-            ProgressBarKit builder = new ProgressBarKit.Builder().waitMs(100).builder();
-            for (int i = 0; i < 100; i++) {
+            ProgressBarKit builder = new ProgressBarKit.Builder().waitMs(50).builder();
+            for (int i = 0; i < 10; i++) {
                 builder.printProgress(i);
             }
             System.out.println("LOGGER = " + LOGGER);
@@ -112,9 +111,8 @@ public class FxController implements Initializable {
     }
 
     @FXML
-    void mainTest() {
+    void nextPage() {
         selectionMode.select(logTab);
-        this.testMethod();
     }
 
     public void otherKit(Function<String, Result> kitMethod) {
@@ -138,14 +136,10 @@ public class FxController implements Initializable {
             if (!filePath.endsWith("#")) {
                 new Alert(Alert.AlertType.WARNING, "文件目录必须是 # ", ButtonType.CLOSE).show();
             } else {
-                long start = System.currentTimeMillis();
-                LOGGER.info("Start operation from {} ", new Date(start));
-                Alert process = new Alert(AlertType.INFORMATION, "任务执行中", null);
+               Alert process = new Alert(AlertType.INFORMATION, "任务执行中", null);
                 process.show();
                 try {
                     OtherKitsService.mainVideoFix(opt, filePath);
-                    long end = System.currentTimeMillis();
-                    LOGGER.info("Finish operation at {}, use {}s", new Date(end), (end - start) / 1000);
                     this.alertAutoClose(null);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -165,7 +159,7 @@ public class FxController implements Initializable {
         fileComboBox.getItems().add("D:\\Archives\\#");
         fileComboBox.setValue("G:\\迅雷\\#");
         outputText.setWrapText(true);
-        //重定向输出流
+        //redirect stream
         PrintStream ps = new PrintStream(new ConsoleOutput(outputText));
         System.setOut(ps);
         System.setErr(ps);

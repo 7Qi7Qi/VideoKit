@@ -40,12 +40,13 @@ public class RenameKit {
             for (File input : files) {
                 if (input.isFile()) {
                     Pair<String, String> result = this.renameInnerOpt(input, extensions);
-                    String nameAfterFix = result.getValue();
-                    renameFileInFolder(input, nameAfterFix == null ? nameAfterFix : input.getName(), 1);
                     if ("torrent".equals(result.getKey())) {
                         if (!input.delete()) {
                             logger.info("【{}】 fail to delete", input);
                         }
+                    }else {
+                        String nameAfterFix = result.getValue();
+                        renameFileInFolder(input, nameAfterFix != null ? nameAfterFix : input.getName(), 1);
                     }
                 }
             }

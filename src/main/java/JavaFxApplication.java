@@ -32,7 +32,7 @@ public class JavaFxApplication extends Application {
                 resource = getClass().getResource(findFxmlFile());
             }
             Parent root = FXMLLoader.load(resource);
-            primaryStage.setTitle("和光同尘 v1.2");
+            primaryStage.setTitle("和光同尘 v1.3");
             primaryStage.setScene(new Scene(root, 960, 640));
             primaryStage.show();
         }catch (IOException e) {

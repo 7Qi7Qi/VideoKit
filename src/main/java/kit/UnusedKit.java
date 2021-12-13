@@ -26,6 +26,14 @@ public class UnusedKit {
         logger.error("logger error " + new Date());
     }
 
+    public static void threadPoolTest() {
+        long start = System.currentTimeMillis();
+        logger.info("Start operation from {} ", new Date(start));
+
+        long end = System.currentTimeMillis();
+        logger.info("Finish operation at {}, use {}s", new Date(end), (end - start) / 1000);
+    }
+
 
     public File correctFile(File input) {
         String fileName = input.getName();

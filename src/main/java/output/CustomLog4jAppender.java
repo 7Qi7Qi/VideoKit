@@ -9,7 +9,7 @@ public class CustomLog4jAppender extends AppenderSkeleton {
 
     @Override
     protected void append(LoggingEvent loggingEvent) {
-        System.out.println("Hello, " + account + " : "+ loggingEvent.getMessage());
+        System.out.println(account + "===> "+ loggingEvent.getMessage());
     }
 
     @Override
