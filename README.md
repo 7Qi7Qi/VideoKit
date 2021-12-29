@@ -1,3 +1,5 @@
+![Alt](https://repobeats.axiom.co/api/embed/736386069c1da7075063d0eecbeb0467f39b3edf.svg "Repobeats analytics image")
+
 make above code more readable
 
 ## Direction
