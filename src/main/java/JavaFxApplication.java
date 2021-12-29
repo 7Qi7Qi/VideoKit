@@ -8,6 +8,7 @@ import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 import kit.RenameKit;
+import kit.ThreadPoolKit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,9 +33,11 @@ public class JavaFxApplication extends Application {
                 resource = getClass().getResource(findFxmlFile());
             }
             Parent root = FXMLLoader.load(resource);
-            primaryStage.setTitle("和光同尘 v1.3");
+            primaryStage.setTitle("和光同尘 v1.4");
             primaryStage.setScene(new Scene(root, 960, 640));
             primaryStage.show();
+            //shutdown threadPool when application intend to close
+            primaryStage.setOnCloseRequest(event -> ThreadPoolKit.getInstance().shutDown());
         }catch (IOException e) {
             LOGGER.error("FXML Configuration File Path is invalid {}", e.getMessage());
         }

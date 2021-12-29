@@ -1,6 +1,9 @@
 package main;
 
+import static main.OtherKitsService.alertAutoClose;
+
 import enums.Result;
+import java.awt.Desktop;
 import java.io.*;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -77,6 +80,18 @@ public class FxController implements Initializable {
     }
 
     @FXML
+    void openFolder() {
+        String filePath = this.fileComboBox.getValue();
+        if (StringUtils.isNotBlank(filePath)) {
+            try {
+                Desktop.getDesktop().open(new File(filePath));
+            } catch (IOException e) {
+                System.out.println("failed to open folder" + filePath);
+            }
+        }
+    }
+
+    @FXML
     void onOpen() {
         //FileChooser
         DirectoryChooser directoryChooser = new DirectoryChooser();
@@ -136,16 +151,11 @@ public class FxController implements Initializable {
             if (!filePath.endsWith("#")) {
                 new Alert(Alert.AlertType.WARNING, "文件目录必须是 # ", ButtonType.CLOSE).show();
             } else {
-               Alert process = new Alert(AlertType.INFORMATION, "任务执行中", null);
-                process.show();
                 try {
                     OtherKitsService.mainVideoFix(opt, filePath);
-                    this.alertAutoClose(null);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    new Alert(AlertType.ERROR, "操作失败" + e.getMessage(), ButtonType.CANCEL).show();
                 }
-                process.close();
             }
         } else {
             new Alert(Alert.AlertType.WARNING, "请先选择文件目录", ButtonType.CLOSE).show();
@@ -167,25 +177,4 @@ public class FxController implements Initializable {
     }
 
 
-    public void alertAutoClose(String contentText) {
-        if (contentText == null) {
-            contentText = "操作完成";
-        }
-        Alert alert = new Alert(AlertType.INFORMATION, contentText, ButtonType.FINISH);
-        alert.show();
-        Thread autoClose = new Thread(() -> {
-            try {
-                Thread.sleep(3000);
-                Platform.runLater(() -> {
-                    if (alert.isShowing()) {
-                        alert.close();
-                    }
-                });
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        });
-        autoClose.setDaemon(true);
-        autoClose.start();
-    }
 }

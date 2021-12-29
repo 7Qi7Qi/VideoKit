@@ -9,8 +9,12 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import kit.RenameKit;
-import kit.VideoKit;
+import java.util.concurrent.Future;
+import javafx.application.Platform;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
+import kit.*;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,15 +23,15 @@ import org.slf4j.LoggerFactory;
 public class OtherKitsService {
 
     public static final Logger logger = LoggerFactory.getLogger(OtherKitsService.class);
+    private static final ThreadPoolKit poolKit = ThreadPoolKit.getInstance();
 
     public static void mainVideoFix(String opt, String path) {
         VideoKit videoKit = new VideoKit();
         ProcessTypeEnum typeEnum = ProcessTypeEnum.getEnumBySequence(opt);
         if (typeEnum == null) {
-            System.out.println("Unknown Operation");
+            alertAutoClose("Unknown Operation");
         } else {
-            Thread thread = new Thread(() -> videoKit.batchProcess(path, typeEnum));
-            thread.start();
+            poolKit.submit(() -> videoKit.batchProcess(path, typeEnum));
         }
     }
 
@@ -120,5 +124,33 @@ public class OtherKitsService {
             return Result.ok();
         }
         return Result.fail().message(String.format("%s路径不存在", mainPath.getPath()));
+    }
+
+    public static void alertAutoClose(String contentText) {
+        if (contentText == null) {
+            contentText = "操作完成";
+        }
+        Alert alert = new Alert(AlertType.INFORMATION, contentText, ButtonType.FINISH);
+        alert.show();
+        Thread autoClose = new Thread(() -> {
+            try {
+                Thread.sleep(3000);
+                Platform.runLater(() -> {
+                    if (alert.isShowing()) {
+                        alert.close();
+                    }
+                });
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+        autoClose.setDaemon(true);
+        autoClose.start();
+    }
+
+    public static void messagePrint(String content) {
+        System.out.println("█████████████████████████████████████████████████████");
+        System.out.println("█████████████████████"+ content +"██████████████████████");
+        System.out.println("█████████████████████████████████████████████████████");
     }
 }

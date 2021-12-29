@@ -1,10 +1,15 @@
 package kit;
 
+import com.google.common.collect.Lists;
 import enums.*;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.FutureTask;
+import java.util.*;
+import java.util.List;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
+import main.OtherKitsService;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -16,10 +21,6 @@ import ws.schild.jave.info.MultimediaInfo;
 import java.awt.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -35,6 +36,7 @@ public class VideoKit {
     private final static List<String> exFileList = Arrays.asList("words.txt", "regex.txt", "rename",
             "output", "cover", "ignore");
     private final static RenameKit renameKit = new RenameKit();
+    private final static ThreadPoolKit poolKit = ThreadPoolKit.getInstance();
 
     public void batchProcess(String pathName, ProcessTypeEnum typeEnum) {
         File mainPath = new File(pathName);
@@ -69,7 +71,7 @@ public class VideoKit {
     public boolean executeCommand(String command) {
         Process process;
         try {
-            logger.info("===> 【{}】", command);
+            logger.info("【{}】", command);
             process = Runtime.getRuntime().exec(command);
             InputStream is = process.getErrorStream();
             InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
@@ -126,21 +128,42 @@ public class VideoKit {
      * video name 2. cut fix cover 3. build latest video cover
      */
     public void oneStepService(List<File> list) {
+        if (list.isEmpty()) {
+            OtherKitsService.messagePrint("No File");
+        }
+//        Lists.partition(list, )
+        List<Future<?>> futures = new ArrayList<>();
         for (File file : list) {
-            String parentFolder = new File(file.getParent()).getName();
-            File handleName = renameKit.renameForFile(file);
-            if (StringUtils.isNumeric(parentFolder)) {
-                String coverCutVideo = cutFixedCover(handleName, Integer.parseInt(parentFolder));
-                if (coverCutVideo != null) {
-                    String trash = createFolderIfAbsent(handleName, FileEnum.OLD_VIDEO.getName());
-                    renameKit.renameFile(handleName, new File(trash + handleName.getName()));
-                    String latestCover = createLatestCover(new File(coverCutVideo));
-                    if (latestCover != null) {
-                        move2Parent(new File(latestCover), 2);
+            Future<?> future = poolKit.submit(() -> {
+                String parentFolder = new File(file.getParent()).getName();
+                File handleName = renameKit.renameForFile(file);
+                if (StringUtils.isNumeric(parentFolder)) {
+                    String coverCutVideo = cutFixedCover(handleName,
+                            Integer.parseInt(parentFolder));
+                    if (coverCutVideo != null) {
+                        String trash = createFolderIfAbsent(handleName,
+                                FileEnum.OLD_VIDEO.getName());
+                        renameKit.renameFile(handleName, new File(trash + handleName.getName()));
+                        String latestCover = createLatestCover(new File(coverCutVideo));
+                        if (latestCover != null) {
+                            move2Parent(new File(latestCover), 2);
+                        }
                     }
                 }
-            }
+            });
+            futures.add(future);
         }
+        futures.forEach(future -> {
+            try {
+                future.get();
+            }catch (Exception e) {
+                logger.error(e.getMessage());
+                e.printStackTrace();
+            }
+        });
+//        OtherKitsService.alertAutoClose(null);
+//        System.out.println("==================================================================");
+        OtherKitsService.messagePrint("Finish Message");
     }
 
     /**

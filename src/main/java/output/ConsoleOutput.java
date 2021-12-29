@@ -25,7 +25,7 @@ public class ConsoleOutput extends OutputStream {
     public void write(@NotNull byte[] b, int off, int len) {
         if ( len > 0) {
             //set string charset, avoid garbled output problem
-            String s = new String(b, off, len, StandardCharsets.UTF_8);
+            String s = new String(b, off, len);
             Platform.runLater(() -> console.appendText(s));
         }
     }
