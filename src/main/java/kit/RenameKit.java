@@ -1,5 +1,6 @@
 package kit;
 
+import com.github.houbb.opencc4j.core.impl.ZhConvertBootstrap;
 import enums.FilePrefixEnum;
 import enums.VideoSuffixEnum;
 import java.util.HashMap;
@@ -23,6 +24,7 @@ public class RenameKit {
     //final 可以调用改对象的任何方法，但不能指向其他实例化对象
     private static final List<String> customWords = new ArrayList<>();
     private static final List<String> customRegex = new ArrayList<>();
+    private static final ZhConvertBootstrap ZH_CONVERT = ZhConvertBootstrap.newInstance();
 
     private static final Map<String, List<String>> customName2File = new HashMap<String, List<String>>() {{
         put("words.txt", customWords);
@@ -82,6 +84,7 @@ public class RenameKit {
         if (types == null || types.contains(extension)) {
             output = seriesRename(fileName);
         }
+        output = ZH_CONVERT.toSimple(output);
         if (output.equals(fileName)) {
             return new Pair<>(extension, null);
         }
@@ -150,6 +153,15 @@ public class RenameKit {
         //HandleFH
         if (input.toLowerCase().matches("[\\w]{3,4}-[\\d]{3,4}(-c)?")) {
             input = input.toUpperCase();
+        }
+        //remove blank that has many blank
+        int firstBlank = input.indexOf(" ");
+        if (firstBlank > 0 && firstBlank < input.length()) {
+            String noBlanks = input.substring(0, firstBlank + 1) + input.substring(firstBlank + 1)
+                    .replace(" ", "");
+            if (input.length() - noBlanks.length() > 2) {
+                input = noBlanks;
+            }
         }
         return input.trim();
     }

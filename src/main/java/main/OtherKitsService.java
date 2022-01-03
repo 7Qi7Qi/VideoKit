@@ -6,10 +6,9 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -24,6 +23,7 @@ public class OtherKitsService {
 
     public static final Logger logger = LoggerFactory.getLogger(OtherKitsService.class);
     private static final ThreadPoolKit poolKit = ThreadPoolKit.getInstance();
+    private static final char unitChar = '▄';
 
     public static void mainVideoFix(String opt, String path) {
         VideoKit videoKit = new VideoKit();
@@ -149,8 +149,15 @@ public class OtherKitsService {
     }
 
     public static void messagePrint(String content) {
-        System.out.println("█████████████████████████████████████████████████████");
-        System.out.println("█████████████████████"+ content +"██████████████████████");
-        System.out.println("█████████████████████████████████████████████████████");
+        String bound = StringUtils.repeat(unitChar, 60);
+        System.out.println(bound);
+        if (content.length() > bound.length()) {
+            System.out.println(content);
+        }else {
+            int index = (int)((bound.length() - content.length()) * 1.3);
+            String s = StringUtils.repeat(' ', index) + content + StringUtils.repeat(' ', index);
+            System.out.println(s);
+        }
+        System.out.println(bound);
     }
 }

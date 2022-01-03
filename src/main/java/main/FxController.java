@@ -114,15 +114,16 @@ public class FxController implements Initializable {
 
     @FXML
     void testMethod() {
-        new Thread(() -> {
-            System.out.println("LOGGER = " + LOGGER);
-            ProgressBarKit builder = new ProgressBarKit.Builder().waitMs(50).builder();
-            for (int i = 0; i < 10; i++) {
-                builder.printProgress(i);
-            }
-            System.out.println("LOGGER = " + LOGGER);
-            UnusedKit.testLogger();
-        }).start();
+//        new Thread(() -> {
+//            System.out.println("LOGGER = " + LOGGER);
+//            ProgressBarKit builder = new ProgressBarKit.Builder().waitMs(50).builder();
+//            for (int i = 0; i < 10; i++) {
+//                builder.printProgress(i);
+//            }
+//            System.out.println("LOGGER = " + LOGGER);
+//            UnusedKit.testLogger();
+//        }).start();
+        selectionMode.select(mainTab);
     }
 
     @FXML
@@ -152,6 +153,7 @@ public class FxController implements Initializable {
                 new Alert(Alert.AlertType.WARNING, "文件目录必须是 # ", ButtonType.CLOSE).show();
             } else {
                 try {
+                    this.nextPage();
                     OtherKitsService.mainVideoFix(opt, filePath);
                 } catch (Exception e) {
                     e.printStackTrace();

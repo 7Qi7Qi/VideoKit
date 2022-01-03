@@ -130,6 +130,7 @@ public class VideoKit {
     public void oneStepService(List<File> list) {
         if (list.isEmpty()) {
             OtherKitsService.messagePrint("No File");
+            return;
         }
 //        Lists.partition(list, )
         List<Future<?>> futures = new ArrayList<>();

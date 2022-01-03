@@ -37,7 +37,12 @@ public class JavaFxApplication extends Application {
             primaryStage.setScene(new Scene(root, 960, 640));
             primaryStage.show();
             //shutdown threadPool when application intend to close
-            primaryStage.setOnCloseRequest(event -> ThreadPoolKit.getInstance().shutDown());
+            try {
+                primaryStage.setOnCloseRequest(event -> ThreadPoolKit.getInstance().shutDown());
+            }catch (Exception e) {
+                LOGGER.error(e.getMessage());
+                e.printStackTrace();
+            }
         }catch (IOException e) {
             LOGGER.error("FXML Configuration File Path is invalid {}", e.getMessage());
         }
