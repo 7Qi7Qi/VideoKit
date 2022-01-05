@@ -170,8 +170,7 @@ public class RenameKit {
 
     public File renameFile(File input, File output) {
         if (output.exists()) {
-            logger.warn("【{}】 already exists, 【{}】 rename failed", output.getAbsolutePath(),
-                    input.getAbsolutePath());
+            logger.warn("【{}】 already exists, 【{}】 rename failed", output.getAbsolutePath(), input.getAbsolutePath());
             File duplicate = new File(output.getParent() + "/duplicate");
             if (!duplicate.exists()) {
                 duplicate.mkdir();
@@ -230,9 +229,8 @@ public class RenameKit {
                 String folderName = e.getName();
                 int i = 0;
                 for (File listFile : e.listFiles()) {
-                    renameFileInFolder(listFile,
-                            folderName + "_" + i++ + StringUtils
-                                    .substringAfterLast(listFile.getName(), "."));
+                    renameFileInFolder(listFile, folderName + "_" + i++
+                            + StringUtils.substringAfterLast(listFile.getName(), "."));
                 }
             });
         }
@@ -245,8 +243,7 @@ public class RenameKit {
      * @param directory find file in the directory
      * @return Pair<Boolean, String> : <Result, FilePath>
      */
-    public static Pair<Boolean, String> findSpecificFile(@NotNull String fileName,
-            String directory) {
+    public static Pair<Boolean, String> findSpecificFile(@NotNull String fileName, String directory) {
         if (StringUtils.isBlank(directory)) {
             directory = System.getProperty("user.dir");
         }
@@ -256,8 +253,7 @@ public class RenameKit {
                 File[] filesInFolder = dirFile.listFiles();
                 //The execution time of the stream is twice that of the for loop
                 for (File file : filesInFolder) {
-                    Pair<Boolean, String> subResult = findSpecificFile(fileName,
-                            file.getAbsolutePath());
+                    Pair<Boolean, String> subResult = findSpecificFile(fileName, file.getAbsolutePath());
                     if (subResult.getKey()) {
                         return subResult;
                     }

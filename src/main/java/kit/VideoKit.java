@@ -1,14 +1,10 @@
 package kit;
 
-import com.google.common.collect.Lists;
 import enums.*;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.ButtonType;
 import main.OtherKitsService;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -21,8 +17,6 @@ import ws.schild.jave.info.MultimediaInfo;
 import java.awt.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 /**
  * @author Jupiter
@@ -34,7 +28,7 @@ public class VideoKit {
 
     private final Logger logger = LoggerFactory.getLogger(VideoKit.class);
     private final static List<String> exFileList = Arrays.asList("words.txt", "regex.txt", "rename",
-            "output", "cover", "ignore");
+            "output", "cover", "ignore", "bin");
     private final static RenameKit renameKit = new RenameKit();
     private final static ThreadPoolKit poolKit = ThreadPoolKit.getInstance();
 
@@ -58,9 +52,10 @@ public class VideoKit {
                 List<File> allFiles = Arrays.stream(listFiles)
                         .filter(e -> e.isDirectory() && StringUtils.isNumeric(e.getName()))
                         .flatMap(e -> Arrays.stream(e.listFiles()))
+                        .filter(File::isFile)
                         .collect(Collectors.toList());
-//                multiThread(allFiles, typeEnum, 2);
-                this.oneStepService(allFiles);
+                this.multiThread(allFiles);
+                //this.oneStepService(allFiles.get(0));
             }
         } else {
             logger.warn("【{}】 does not exist or mainPath name is not #", mainPath);
@@ -88,72 +83,19 @@ public class VideoKit {
         }
     }
 
-    @Deprecated
-    public void multiThread(List<File> allFiles, ProcessTypeEnum typeEnum, Integer threads) {
-        switch (typeEnum) {
-            case CUT_VIDEO:
-//                if (folderName.matches("[0-9]+")) {
-//                    int startSecond = Integer.parseInt(folderName);
-//                    fileStream.forEach(e -> cutFixedCover(e, startSecond));
-//                } else if (!exFileList.contains(folderName)) {
-//                    logger.info("【{}】's folder name must only consist of number",
-//                            folder);
-//                }
-//                break;
-            case FIX_DOWNLOAD:
-                int unit = (int) Math.ceil(allFiles.size() / (double) threads);
-                for (int i = 0; i < threads; i++) {
-                    final int index = i;
-                    new Thread(() -> this.oneStepService(allFiles.subList(unit * index,
-                            Math.min(allFiles.size(), unit * (index + 1))))).start();
-//                    FutureTask<String> futureTask = new FutureTask<>(() -> {
-//                        new Thread(() -> this.oneStepService(allFiles.subList(unit * index,
-//                                Math.min(allFiles.size(), unit * (index + 1))))).start();
-//                        return "";
-//                    });
-//                    if (futureTask.isDone()) {
-//                        System.out.println(i + " future task is done");
-//                    }
-                }
-//                fileStream.filter(File::isFile).forEach(e -> oneStepService(e, folderName));
-                break;
-            default:
-                logger.warn("【{}】 unknown enum", typeEnum);
-        }
-    }
-
-    /*****************************************VideoRelated*****************************************/
-    /**
-     * one step to handle downloaded video 1. handle file name, remove redundant string words in
-     * video name 2. cut fix cover 3. build latest video cover
-     */
-    public void oneStepService(List<File> list) {
+    /***************************************VideoRelated**************************************/
+    public void multiThread(List<File> list) {
         if (list.isEmpty()) {
             OtherKitsService.messagePrint("No File");
             return;
         }
-//        Lists.partition(list, )
+        //Lists.partition(list, )
         List<Future<?>> futures = new ArrayList<>();
         for (File file : list) {
-            Future<?> future = poolKit.submit(() -> {
-                String parentFolder = new File(file.getParent()).getName();
-                File handleName = renameKit.renameForFile(file);
-                if (StringUtils.isNumeric(parentFolder)) {
-                    String coverCutVideo = cutFixedCover(handleName,
-                            Integer.parseInt(parentFolder));
-                    if (coverCutVideo != null) {
-                        String trash = createFolderIfAbsent(handleName,
-                                FileEnum.OLD_VIDEO.getName());
-                        renameKit.renameFile(handleName, new File(trash + handleName.getName()));
-                        String latestCover = createLatestCover(new File(coverCutVideo));
-                        if (latestCover != null) {
-                            move2Parent(new File(latestCover), 2);
-                        }
-                    }
-                }
-            });
+            Future<?> future = poolKit.submit(() -> oneStepService(file));
             futures.add(future);
         }
+        //wait for all thread completed
         futures.forEach(future -> {
             try {
                 future.get();
@@ -162,14 +104,34 @@ public class VideoKit {
                 e.printStackTrace();
             }
         });
-//        OtherKitsService.alertAutoClose(null);
-//        System.out.println("==================================================================");
         OtherKitsService.messagePrint("Finish Message");
     }
 
     /**
+     * 1. handle file name, remove redundant string words in video name
+     * 2. cut fix cover
+     * 3. build the latest video cover
+     */
+    public void oneStepService(File file) {
+        String parentFolder = new File(file.getParent()).getName();
+        File handleName = renameKit.renameForFile(file);
+        if (StringUtils.isNumeric(parentFolder)) {
+            String coverCutVideo = cutFixedCover(handleName, Integer.parseInt(parentFolder));
+            if (coverCutVideo != null) {
+                String trash = createFolderIfAbsent(handleName, FileEnum.OLD_VIDEO.getName());
+                renameKit.renameFile(handleName, new File(trash + handleName.getName()));
+                String latestCover = createLatestCover(new File(coverCutVideo));
+                if (latestCover != null) {
+                    File out = move2Parent(new File(latestCover), 3);
+                    String outPath = out.getParent() + FileEnum.OUTPUT.getName();
+                    renameKit.renameFile(out, new File(outPath, out.getName()));
+                }
+            }
+        }
+    }
+
+    /**
      * get video length
-     *
      * @param file video
      * @return video length in units of millisecond
      */
@@ -261,13 +223,13 @@ public class VideoKit {
     }
 
     /***************************************DirectoryRelated***************************************/
-
-    public void move2Parent(File input, int layer) {
+    public File move2Parent(File input, int layer) {
         File output = input;
         for (int i = 0; i < layer; i++) {
             output = new File(new File(output.getParent()).getParent(), input.getName());
         }
         renameKit.renameFile(input, output);
+        return output;
     }
 
     /**

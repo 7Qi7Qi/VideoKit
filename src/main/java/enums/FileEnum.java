@@ -11,6 +11,7 @@ public enum FileEnum {
     OLD_VIDEO("trash"),
     COVER_FOLDER("screenshot"),
     ORIGINAL_FILE("original"),
+    OUTPUT("\\ignore"),
 
     TXT_FILE(".txt"),
     DEFAULT_EXPORT_FILE("document.txt");
