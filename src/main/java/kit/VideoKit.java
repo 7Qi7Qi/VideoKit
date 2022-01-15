@@ -6,13 +6,12 @@ import java.util.List;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 import main.OtherKitsService;
+import net.bramp.ffmpeg.FFprobe;
+import net.bramp.ffmpeg.probe.*;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ws.schild.jave.EncoderException;
-import ws.schild.jave.MultimediaObject;
-import ws.schild.jave.info.MultimediaInfo;
 
 import java.awt.*;
 import java.io.*;
@@ -132,31 +131,32 @@ public class VideoKit {
 
     /**
      * get video length
-     * @param file video
+     * @param path video path
      * @return video length in units of millisecond
      */
-    public long getVideoLength(File file) {
-        MultimediaObject object = new MultimediaObject(file);
-        long duration = -1;
+    public double getVideoLength(String path) {
+        double duration = -1;
         try {
-            MultimediaInfo info = object.getInfo();
-//      VideoInfo video = info.getVideo();
-            duration = info.getDuration();
-        } catch (EncoderException e) {
-            logger.warn("【{}】 get video length occur exception => 【{}】", file.getName(),
-                    e.getMessage());
+            FFprobe ffprobe = new FFprobe(FFMPEGEnum.FFPROBE_PATH.normalCMD());
+            FFmpegProbeResult probeResult = ffprobe.probe(path);
+            FFmpegFormat result = probeResult.getFormat();
+            duration = result.duration;
+        } catch (IOException e) {
+            logger.error("{} get media info error=> {}", path, e.getMessage());
+
         }
         return duration;
     }
 
+
     public String cutFixedCover(File file, long startSecond) {
         if (file.isFile()) {
-            return cutFixedSize(file, startSecond, getVideoLength(file));
+            return cutFixedSize(file, startSecond, getVideoLength(file.getAbsolutePath()));
         }
         return null;
     }
 
-    public String cutFixedSize(@NotNull File file, long start, long end) {
+    public String cutFixedSize(@NotNull File file, long start, double end) {
         String outputPath =
                 createFolderIfAbsent(file, FileEnum.VIDEO_FOLDER.getName()) + file.getName();
         if (fileNotExist(outputPath)) {

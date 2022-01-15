@@ -1,5 +1,7 @@
 package enums;
 
+import java.util.Arrays;
+
 /**
  * @author https://ffmpeg.org/ffmpeg.html
  */
@@ -17,6 +19,7 @@ public enum FFMPEGEnum {
      */
 //  -threads 4 -preset ultrafast
     FFMPEG_PATH("FFMPEG System Environment Path", "ffmpeg "),
+    FFPROBE_PATH("FFPROBE System Environment Path", "ffprobe "),
     SIMPLE_CLIP("IN-START-END-OUT", " -ss %s -i \"%s\" -to %s -c copy \"%s\""),
     CREATE_COVER("TIME-IN-OUT", " -ss %s -i \"%s\" -vframes 1 -q:v 1 \"%s\""),
     REPLACE_COVER("IN-PIC-OUT",
@@ -29,14 +32,14 @@ public enum FFMPEGEnum {
     }
 
     public String normalCMD() {
-        if (FFMPEGEnum.FFMPEG_PATH.equals(this)) {
+        if (Arrays.asList(FFMPEGEnum.FFMPEG_PATH, FFPROBE_PATH).contains(this)) {
             return this.cmd;
         }
         return FFMPEG_PATH.cmd + this.cmd;
     }
 
     public String forceCoverCMD() {
-        if (FFMPEGEnum.FFMPEG_PATH.equals(this)) {
+        if (Arrays.asList(FFMPEGEnum.FFMPEG_PATH, FFPROBE_PATH).contains(this)) {
             return this.cmd;
         }
         return FFMPEG_PATH.cmd + " -y " + this.cmd;

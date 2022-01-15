@@ -1,7 +1,6 @@
 import enums.ProcessTypeEnum;
 import java.io.File;
 import kit.VideoKit;
-import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -38,5 +37,7 @@ public class FunctionTest {
     }
 
     public static void main(String[] args) {
+        VideoKit videoKit = new VideoKit();
+        videoKit.getVideoLength("G:\\迅雷\\#\\ignore\\[脸肿字幕组][720P][魔人]euphoria～地下の戦栗ゲーム、地上のス カトロ地狱。笑う黒幕は……幼なじみ！？编(2).mp4");
     }
 }
