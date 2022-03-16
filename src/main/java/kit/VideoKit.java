@@ -30,6 +30,7 @@ public class VideoKit {
             "output", "cover", "ignore", "bin");
     private final static RenameKit renameKit = new RenameKit();
     private final static ThreadPoolKit poolKit = ThreadPoolKit.getInstance();
+    public final static FFmpegKit ffmpegKit = FFmpegKit.getInstance();
 
     public void batchProcess(String pathName, ProcessTypeEnum typeEnum) {
         File mainPath = new File(pathName);
@@ -85,7 +86,7 @@ public class VideoKit {
     /***************************************VideoRelated**************************************/
     public void multiThread(List<File> list) {
         if (list.isEmpty()) {
-            OtherKitsService.messagePrint("No File");
+            OtherKitsService.messagePrint2("No File");
             return;
         }
         //Lists.partition(list, )
@@ -103,7 +104,7 @@ public class VideoKit {
                 e.printStackTrace();
             }
         });
-        OtherKitsService.messagePrint("Finish Message");
+        OtherKitsService.messagePrint2("Finish Message");
     }
 
     /**
@@ -129,29 +130,12 @@ public class VideoKit {
         }
     }
 
-    /**
-     * get video length
-     * @param path video path
-     * @return video length in units of millisecond
-     */
-    public double getVideoLength(String path) {
-        double duration = -1;
-        try {
-            FFprobe ffprobe = new FFprobe(FFMPEGEnum.FFPROBE_PATH.normalCMD());
-            FFmpegProbeResult probeResult = ffprobe.probe(path);
-            FFmpegFormat result = probeResult.getFormat();
-            duration = result.duration;
-        } catch (IOException e) {
-            logger.error("{} get media info error=> {}", path, e.getMessage());
 
-        }
-        return duration;
-    }
 
 
     public String cutFixedCover(File file, long startSecond) {
         if (file.isFile()) {
-            return cutFixedSize(file, startSecond, getVideoLength(file.getAbsolutePath()));
+            return cutFixedSize(file, startSecond, ffmpegKit.getVideoLength(file.getAbsolutePath()));
         }
         return null;
     }

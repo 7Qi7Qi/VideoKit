@@ -1,6 +1,7 @@
 package main;
 
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.base.Strings;
 import enums.*;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -160,4 +161,21 @@ public class OtherKitsService {
         }
         System.out.println(bound);
     }
+
+    public static void messagePrint2(String msg) {
+        String[] corners = {"═", "║", "║\n", "╔", "╗\n", "╚", "╝\n"};
+        String splitLine = Strings.repeat(corners[0], 60);
+        StringBuilder sb = new StringBuilder();
+        sb.append(corners[3]).append(splitLine).append(corners[4]);
+        sb.append(corners[1]).append(String.format("%144s", "")).append(corners[2]);
+        for (String single : msg.split("\n")) {
+            sb.append(corners[1])
+                    .append(String.format("%70s", single))
+                    .append(Strings.repeat(" ", 70))
+                    .append(corners[2]);
+        }
+        sb.append(corners[1]).append(String.format("%144s", "")).append(corners[2]);
+        sb.append(corners[5]).append(splitLine).append(corners[6]);
+    }
+
 }
