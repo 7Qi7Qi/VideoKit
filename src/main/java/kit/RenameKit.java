@@ -3,8 +3,7 @@ package kit;
 import com.github.houbb.opencc4j.core.impl.ZhConvertBootstrap;
 import enums.FilePrefixEnum;
 import enums.VideoSuffixEnum;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import javafx.util.Pair;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -13,10 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
 
 @SuppressWarnings({"unused", "ConstantConditions"})
 public class RenameKit {
@@ -37,7 +32,7 @@ public class RenameKit {
         if (file.isFile()) {
             renameForFile(file);
         }else {
-            List<String> extensions = VideoSuffixEnum.getAllExtensions();
+            Set<String> extensions = VideoSuffixEnum.getAllExtensions();
             File[] files = file.listFiles();
             for (File input : files) {
                 if (input.isFile()) {
@@ -75,7 +70,7 @@ public class RenameKit {
      * @param types rename file that in types
      * @return extension , fileName
      */
-    private Pair<String, String> renameInnerOpt(File input, List<String> types) {
+    private Pair<String, String> renameInnerOpt(File input, Set<String> types) {
         String inputName = input.getName();
         int dotIndex = inputName.lastIndexOf('.');
         String fileName = inputName.substring(0, dotIndex);

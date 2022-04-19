@@ -1,5 +1,6 @@
 import enums.ProcessTypeEnum;
 import java.io.File;
+import java.util.List;
 import kit.FFmpegKit;
 import kit.VideoKit;
 import main.OtherKitsService;
@@ -53,5 +54,19 @@ public class FunctionTest {
     @Test
     public void messagePrint2Test() {
         OtherKitsService.messagePrint2("");
+    }
+
+    @Test
+    public void getAllFilesTest() {
+        File file = new File("D:\\Archives\\#");
+        List<File> allChildFiles = OtherKitsService.getAllChildFiles(file);
+        System.out.println(allChildFiles);
+    }
+
+    @Test
+    public void fileExtTest() {
+        File file = new File("D:\\Archives\\#document.txt");
+        String fileExtension = OtherKitsService.getFileExtension(file);
+        System.out.println("fileExtension = " + fileExtension);
     }
 }

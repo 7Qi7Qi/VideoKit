@@ -1,7 +1,6 @@
 package enums;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public enum VideoSuffixEnum {
@@ -14,6 +13,7 @@ public enum VideoSuffixEnum {
     MPEG("mpeg"),
     RMVB("rmvb"),
     TS("ts"),
+    WEBM("webm"),
     WMV("wmv");
 
     private final String extension;
@@ -25,7 +25,7 @@ public enum VideoSuffixEnum {
         return extension;
     }
 
-    public static List<String> getAllExtensions() {
-        return Arrays.stream(VideoSuffixEnum.values()).map(VideoSuffixEnum::getExtension).collect(Collectors.toList());
+    public static Set<String> getAllExtensions() {
+        return Arrays.stream(VideoSuffixEnum.values()).map(VideoSuffixEnum::getExtension).collect(Collectors.toSet());
     }
 }

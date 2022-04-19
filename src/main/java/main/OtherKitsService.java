@@ -37,7 +37,7 @@ public class OtherKitsService {
     }
 
     public static Result tidyVideos(String path) {
-        List<String> videoTypes = VideoSuffixEnum.getAllExtensions();
+        Set<String> videoTypes = VideoSuffixEnum.getAllExtensions();
         RenameKit renameKit = new RenameKit();
         File mainPath = new File(path);
         if (mainPath.exists()) {
@@ -53,20 +53,34 @@ public class OtherKitsService {
                         Optional<File> fileOptional = Arrays.stream(files)
                                 .filter(e -> isSpecificFile(videoTypes, e.getName()))
                                 .findAny();
+
+                        File video;
+                        boolean directVideo = true;
                         if (fileOptional.isPresent()) {
-                            File video = fileOptional.get();
+                            video = fileOptional.get();
+                        } else {
+                            List<File> childFiles = getAllChildFiles(folder);
+                            video = childFiles.stream().filter(e -> isSpecificFile(videoTypes, e.getName()))
+                                    .findFirst().orElse(null);
+                            directVideo = false;
+                        }
+
+                        if (video != null) {
                             JSONObject jsonObject = getJSONObject(
                                     new File(folder.getAbsolutePath(), "project.json"));
                             if (jsonObject == null) {
                                 renameKit.renameFile(video, new File(path, video.getName()));
                             }else {
+                                String title = jsonObject.getString("title");
                                 String videoName = jsonObject.getString("file");
 //                                String description = jsonObject.getString("description");
-                                String title = jsonObject.getString("title");
                                 if (StringUtils.isNotBlank(title)) {
                                     bw.write(StringUtils.join(videoName, "--->   ", title, "\n"));
                                 }
-                                logger.info("get video name from project.json {}", videoName);
+                                if (!directVideo) {
+                                    videoName = title + "." + getFileExtension(video);
+                                }
+                                logger.info("get video name from project.json <== {}", videoName);
                                 renameKit.renameFile(video, new File(path, videoName));
                             }
                         }
@@ -97,8 +111,30 @@ public class OtherKitsService {
         }
     }
 
-    public static boolean isSpecificFile(List<String> types, String fileName) {
-        String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
+    public static List<File> getAllChildFiles(File main) {
+        List<File> children = new ArrayList<>();
+        if (main.exists()) {
+            if (main.isFile()) {
+                children.add(main);
+            } else {
+                for (File file : main.listFiles()) {
+                    children.addAll(getAllChildFiles(file));
+                }
+            }
+        }
+        return children;
+    }
+
+    public static String getFileExtension(File file) {
+        return getFileExtension(file.getName());
+    }
+
+    public static String getFileExtension(String fileName) {
+        return fileName.substring(fileName.lastIndexOf(".") + 1);
+    }
+
+    public static boolean isSpecificFile(Set<String> types, String fileName) {
+        String extension = getFileExtension(fileName);
         return types.contains(extension.toLowerCase());
     }
 
@@ -154,8 +190,8 @@ public class OtherKitsService {
         System.out.println(bound);
         if (content.length() > bound.length()) {
             System.out.println(content);
-        }else {
-            int index = (int)((bound.length() - content.length()) * 1.3);
+        } else {
+            int index = (int) ((bound.length() - content.length()) * 1.3);
             String s = StringUtils.repeat(' ', index) + content + StringUtils.repeat(' ', index);
             System.out.println(s);
         }
