@@ -6,9 +6,11 @@ public enum ProcessTypeEnum {
     FIX_NAME("2", "文件名去除自定义多余字段", "rename"),
     CUT_VIDEO("3", "根据文件夹名称剪辑片头", ""),
     BUILD_LATEST_COVER("4", "生成最新的视频封面", "cover"),
+    MERGE_VIDEO("5", "文件夹视频合并", ""),
 
     BUILD_COVER_PIC(null,"生成目录下所有视频封面", "cover"),
-    MOVE_PRETREAT(null,"视频根据封面移动预处理", "");
+    MOVE_PRETREAT(null,"视频根据封面移动预处理", ""),
+    ;
 
     private final String sequence;
     private final String msg;

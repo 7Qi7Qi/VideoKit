@@ -124,6 +124,7 @@ public class FxController implements Initializable {
 //            UnusedKit.testLogger();
 //        }).start();
         selectionMode.select(mainTab);
+        preTreat("5");
     }
 
     @FXML

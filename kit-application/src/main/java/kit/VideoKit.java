@@ -48,6 +48,8 @@ public class VideoKit {
                 Arrays.stream(listFiles).forEach(this::captureCover);
             } else if (ProcessTypeEnum.BUILD_LATEST_COVER.equals(typeEnum)) {
                 Arrays.stream(listFiles).forEach(this::createLatestCover);
+            } else if (ProcessTypeEnum.MERGE_VIDEO.equals(typeEnum)) {
+                this.mergeVideos(mainPath);
             } else {
                 List<File> allFiles = Arrays.stream(listFiles)
                         .filter(e -> e.isDirectory() && StringUtils.isNumeric(e.getName()))
@@ -105,6 +107,20 @@ public class VideoKit {
             }
         });
         OtherKitsService.messagePrint2("Finish Message");
+    }
+
+    public void mergeVideos(File mainPath) {
+        File[] files;
+        if (mainPath.exists() && (files = mainPath.listFiles()) != null) {
+            //""括起 文件名
+            String videos = Arrays.stream(files).map(File::getAbsolutePath).collect(Collectors.joining("|"));
+            //todo get file extension from file sample
+            String command = String.format(FFMPEGEnum.MERGE_VIDEO.normalCMD(), videos, "output.mp4");
+            boolean result = executeCommand(command);
+            if (!result) {
+                System.out.println("fail to merge video in path：" + mainPath.getAbsolutePath());
+            }
+        }
     }
 
     /**
